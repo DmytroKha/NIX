@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/NIX.iml" filepath="$PROJECT_DIR$/.idea/NIX.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/NIX_Education.iml" filepath="$PROJECT_DIR$/.idea/NIX_Education.iml" />
     </modules>
   </component>
 </project>
