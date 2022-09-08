@@ -22,9 +22,9 @@ func main() {
 
 	//3.	Отримання інформації з мережі. Є сервіс https://jsonplaceholder.typicode.com/ .
 	//представляє REST API для отримання даних у форматі JSON. Сайт надає доступ до таких ресурсів:
-	formData := strings.NewReader(`{}`)
+	tempData := strings.NewReader(`{}`)
 
-	req, err := http.NewRequest("GET", "https://jsonplaceholder.typicode.com/posts", formData)
+	req, err := http.NewRequest("GET", "https://jsonplaceholder.typicode.com/posts", tempData)
 
 	if err != nil {
 		log.Fatalln(err)
@@ -41,10 +41,6 @@ func main() {
 		_ = resp.Body.Close()
 	}()
 
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	if resp.StatusCode != 200 {
 		err = fmt.Errorf("bad request")
 		log.Fatalln(err)
@@ -53,14 +49,20 @@ func main() {
 	dec := json.NewDecoder(resp.Body)
 
 	var m Message
+
 	err = dec.Decode(&m)
+
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
-	data2, err := json.MarshalIndent(m, "", "    ")
+
+	data, err := json.MarshalIndent(m, "", "    ")
+
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
-	fmt.Printf("%s\n", data2)
+	fmt.Printf("%s\n", data)
+
+	//4.	Горутини.
 
 }
