@@ -1,10 +1,15 @@
 package main
 
 import (
+	"NIX/internal/app"
+	"NIX/internal/infra/database"
+	"NIX/internal/infra/http/controllers"
+	"NIX/internal/infra/http/requests"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/labstack/echo"
 	mysqlG "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -55,6 +60,22 @@ type commentHendler struct {
 	store *gorm.DB
 }
 
+// @title           Swagger Example API
+// @version         1.0
+// @description     This is a sample server celler server.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.basic  BasicAuth
 func main() {
 
 	//BEGINNER. 1.	Налаштувати середовище розробки.
@@ -76,17 +97,24 @@ func main() {
 	//BEGINNER. 6.	Робота с БД
 	//useDB()
 
-	//TRAINEE 1.	Сodestyle
+	//TRAINEE. 1.	Сodestyle
 	//golangci-lint run
 
-	//TRAINEE 2.	Gitflow
+	//TRAINEE. 2.	Gitflow
 	//???
 
-	//TRAINEE 3.	GORM
+	//TRAINEE. 3.	GORM
 	//useDBWithGORM()
 
-	//TRAINEE 4.	Створення REST API
-	createRESTAPI()
+	//TRAINEE. 4.	Створення REST API
+	//createRESTAPI()
+
+	//TRAINEE. 5.	Echo framework
+	echoRESTAPI()
+
+	//TRAINEE. 6.	Swagger specification
+	//Додай swagger до API. Використовуй пакет - swag
+
 }
 
 func printHello() {
@@ -745,4 +773,50 @@ func internalServerError(w http.ResponseWriter, r *http.Request) {
 func notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 	w.Write([]byte("not found"))
+}
+
+func echoRESTAPI() {
+
+	dsn := "root:root@tcp(127.0.0.1:3306)/nix_education"
+	db, err := gorm.Open(mysqlG.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	postRepository := database.NewPostRepository(db)
+	postService := app.NewPostService(postRepository)
+	postController := controllers.NewPostController(postService)
+
+	commentRepository := database.NewCommentRepository(db)
+	commentService := app.NewCommentService(commentRepository)
+	commentController := controllers.NewCommentController(commentService)
+
+	e := echo.New()
+	e.Validator = requests.NewValidator()
+
+	api := e.Group("/api/v1", serverHeader)
+	api.GET("/posts", postController.FindAll)
+	api.POST("/posts", postController.Save)
+	api.GET("/posts/:id", postController.Find)
+	api.PUT("/posts/:id", postController.Update) //розібратися з контекстом
+	api.DELETE("/posts/:id", postController.Delete)
+
+	api.GET("/comments", commentController.FindAll)
+	api.POST("/comments", commentController.Save)
+	api.GET("/comments/:id", commentController.Find)
+	api.PUT("/comments/:id", commentController.Update)
+	api.DELETE("/comments/:id", commentController.Delete)
+
+	// service start at port :8080
+	err = e.Start(":8080")
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func serverHeader(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		c.Response().Header().Set("x-version", "Test/v1.0")
+		return next(c)
+	}
 }
