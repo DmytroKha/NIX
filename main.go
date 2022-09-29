@@ -9,7 +9,9 @@ import (
 	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
+	"github.com/swaggo/echo-swagger"
+	_ "github.com/swaggo/echo-swagger/example/docs"
 	mysqlG "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -60,22 +62,17 @@ type commentHendler struct {
 	store *gorm.DB
 }
 
-// @title           Swagger Example API
-// @version         1.0
-// @description     This is a sample server celler server.
-// @termsOfService  http://swagger.io/terms/
+// @title NIX_Education API
+// @version 1.0
+// @description API Server for NIX_Education application.
 
-// @contact.name   API Support
-// @contact.url    http://www.swagger.io/support
-// @contact.email  support@swagger.io
+// @host localhost:8080
+// @BasePath /
 
-// @license.name  Apache 2.0
-// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 
-// @host      localhost:8080
-// @BasePath  /api/v1
-
-// @securityDefinitions.basic  BasicAuth
 func main() {
 
 	//BEGINNER. 1.	Налаштувати середовище розробки.
@@ -114,6 +111,7 @@ func main() {
 
 	//TRAINEE. 6.	Swagger specification
 	//Додай swagger до API. Використовуй пакет - swag
+	//http://localhost:8080/swagger/index.html
 
 }
 
@@ -807,6 +805,7 @@ func echoRESTAPI() {
 	api.PUT("/comments/:id", commentController.Update)
 	api.DELETE("/comments/:id", commentController.Delete)
 
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	// service start at port :8080
 	err = e.Start(":8080")
 	if err != nil {

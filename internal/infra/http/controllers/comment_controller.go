@@ -4,7 +4,7 @@ import (
 	"NIX/internal/app"
 	"NIX/internal/domain"
 	"NIX/internal/infra/http/requests"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
 )
