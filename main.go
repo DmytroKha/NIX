@@ -1,17 +1,16 @@
 package main
 
 import (
+	"NIX/config"
+	_ "NIX/docs"
 	"NIX/internal/app"
 	"NIX/internal/infra/database"
 	"NIX/internal/infra/http/controllers"
-	"NIX/internal/infra/http/requests"
+	"NIX/internal/infra/http/router"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/labstack/echo/v4"
-	"github.com/swaggo/echo-swagger"
-	_ "github.com/swaggo/echo-swagger/example/docs"
 	mysqlG "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -62,16 +61,16 @@ type commentHendler struct {
 	store *gorm.DB
 }
 
-// @title NIX_Education API
-// @version 1.0
+// @title       NIX_Education API
+// @version     1.0
 // @description API Server for NIX_Education application.
 
-// @host localhost:8080
-// @BasePath /
+// @host     localhost:8080
+// @BasePath  /api/v1
 
 // @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
+// @in                         header
+// @name                       Authorization
 
 func main() {
 
@@ -774,48 +773,73 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func echoRESTAPI() {
+	/*
+		exitCode := 0
+		ctx, cancel := context.WithCancel(context.Background())
 
-	dsn := "root:root@tcp(127.0.0.1:3306)/nix_education"
+		// Recover
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Printf("The system panicked!: %v\n", r)
+				fmt.Printf("Stack trace form panic: %s\n", string(debug.Stack()))
+				exitCode = 1
+			}
+			os.Exit(exitCode)
+		}()
+
+		// Signals
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+		go func() {
+			sig := <-c
+			fmt.Printf("Received signal '%s', stopping... \n", sig.String())
+			cancel()
+			fmt.Printf("Sent cancel to all threads...")
+		}()
+	*/
+
+	var conf = config.GetConfiguration()
+
+	err := database.Migrate(conf)
+	if err != nil {
+		log.Fatalf("Unable to apply migrations: %q\n", err)
+	}
+	//dsn := "root:root@tcp(127.0.0.1:3306)/nix_education"
+	dsn := fmt.Sprintf("%v:%v@tcp(%v)/%v",
+		conf.DatabaseUser,
+		conf.DatabasePassword,
+		conf.DatabaseHost,
+		conf.DatabaseName)
 	db, err := gorm.Open(mysqlG.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	userRepository := database.NewUserRepository(db)
+	userService := app.NewUserService(userRepository)
+	userController := controllers.NewUserController(userService)
+
+	authService := app.NewAuthService(userService, conf)
+	authController := controllers.NewAuthController(authService, userService)
 
 	postRepository := database.NewPostRepository(db)
 	postService := app.NewPostService(postRepository)
 	postController := controllers.NewPostController(postService)
 
 	commentRepository := database.NewCommentRepository(db)
-	commentService := app.NewCommentService(commentRepository)
+	commentService := app.NewCommentService(commentRepository, postService)
 	commentController := controllers.NewCommentController(commentService)
 
-	e := echo.New()
-	e.Validator = requests.NewValidator()
+	e := router.New(
+		userController,
+		authController,
+		postController,
+		commentController,
+		conf)
 
-	api := e.Group("/api/v1", serverHeader)
-	api.GET("/posts", postController.FindAll)
-	api.POST("/posts", postController.Save)
-	api.GET("/posts/:id", postController.Find)
-	api.PUT("/posts/:id", postController.Update) //розібратися з контекстом
-	api.DELETE("/posts/:id", postController.Delete)
-
-	api.GET("/comments", commentController.FindAll)
-	api.POST("/comments", commentController.Save)
-	api.GET("/comments/:id", commentController.Find)
-	api.PUT("/comments/:id", commentController.Update)
-	api.DELETE("/comments/:id", commentController.Delete)
-
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	// service start at port :8080
 	err = e.Start(":8080")
 	if err != nil {
 		log.Fatalln(err)
-	}
-}
-
-func serverHeader(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		c.Response().Header().Set("x-version", "Test/v1.0")
-		return next(c)
 	}
 }

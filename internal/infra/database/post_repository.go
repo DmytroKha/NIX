@@ -9,16 +9,16 @@ import (
 const PostTableName = "posts"
 
 type post struct {
-	UserId int64  `db:"userId"`
-	Id     int64  `db:"id"`
-	Title  string `db:"title"`
-	Body   string `db:"body"`
+	Id     int64 `gorm:"primary_key;auto_increment;not_null"`
+	UserId int64
+	Title  string
+	Body   string
 }
 
 type PostRepository interface {
 	Save(post domain.Post) (domain.Post, error)
 	Find(id int64) (domain.Post, error)
-	FindAll(userId int64, p domain.Pagination) (domain.Posts, error)
+	FindAll(p domain.Pagination) (domain.Posts, error)
 	Update(post domain.Post) (domain.Post, error)
 	Delete(id int64) error
 }
@@ -38,7 +38,7 @@ func (r postRepository) Save(p domain.Post) (domain.Post, error) {
 
 	pst.FromDomainModel(p)
 
-	err := r.sess.Table(PostTableName).Create(pst).Error
+	err := r.sess.Table(PostTableName).Create(&pst).Error
 	if err != nil {
 		return domain.Post{}, err
 	}
@@ -51,27 +51,24 @@ func (r postRepository) Find(id int64) (domain.Post, error) {
 
 	err := r.sess.Table(PostTableName).First(&pst, "id = ?", id).Error
 	if err != nil {
-		if err == gorm.ErrRecordNotFound { //not found
-			return domain.Post{}, nil
-		}
 		return domain.Post{}, err
 	}
 
 	return pst.ToDomainModel(), nil
 }
 
-func (r postRepository) FindAll(userId int64, p domain.Pagination) (domain.Posts, error) {
+func (r postRepository) FindAll(p domain.Pagination) (domain.Posts, error) {
 	var posts []post
 	offset := (p.Page - 1) * p.CountPerPage
 	queryBuider := r.sess.Table(PostTableName).Limit(int(p.CountPerPage)).Offset(int(offset))
-	err := queryBuider.Where("user_id = ?", userId).Find(&posts).Error
+	err := queryBuider.Find(&posts).Error
 	if err != nil {
 		return domain.Posts{}, err
 	}
 
 	dposts := mapToPostDomainCollection(posts)
 
-	result := r.sess.Table(PostTableName).Where("user_id = ?", userId).Find(&posts)
+	result := r.sess.Table(PostTableName).Find(&posts)
 	if result.Error != nil {
 		return domain.Posts{}, result.Error
 	}
@@ -89,11 +86,8 @@ func (r postRepository) Update(p domain.Post) (domain.Post, error) {
 
 	pst.FromDomainModel(p)
 
-	err := r.sess.Save(pst).Error
+	err := r.sess.Save(&pst).Error
 	if err != nil {
-		if err == gorm.ErrRecordNotFound { //not found
-			return domain.Post{}, nil
-		}
 		return domain.Post{}, err
 	}
 
@@ -103,9 +97,6 @@ func (r postRepository) Update(p domain.Post) (domain.Post, error) {
 func (r postRepository) Delete(id int64) error {
 	err := r.sess.Table(PostTableName).Where("id = ?", id).Delete(domain.Post{}).Error
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil
-		}
 		return err
 	}
 

@@ -3,6 +3,7 @@ package app
 import (
 	"NIX/internal/domain"
 	"NIX/internal/infra/database"
+	"errors"
 	"log"
 )
 
@@ -10,8 +11,8 @@ type PostService interface {
 	Save(post domain.Post) (domain.Post, error)
 	Update(post domain.Post) (domain.Post, error)
 	Find(id int64) (domain.Post, error)
-	FindAll(userId int64, p domain.Pagination) (domain.Posts, error)
-	Delete(id int64) error
+	FindAll(p domain.Pagination) (domain.Posts, error)
+	Delete(id, userId int64) error
 }
 
 type postService struct {
@@ -44,8 +45,8 @@ func (s postService) Find(id int64) (domain.Post, error) {
 	return post, nil
 }
 
-func (s postService) FindAll(userId int64, p domain.Pagination) (domain.Posts, error) {
-	posts, err := s.postRepo.FindAll(userId, p)
+func (s postService) FindAll(p domain.Pagination) (domain.Posts, error) {
+	posts, err := s.postRepo.FindAll(p)
 	if err != nil {
 		log.Print(err)
 		return domain.Posts{}, err
@@ -55,6 +56,20 @@ func (s postService) FindAll(userId int64, p domain.Pagination) (domain.Posts, e
 }
 
 func (s postService) Update(p domain.Post) (domain.Post, error) {
+
+	findPost, err := s.Find(p.Id)
+
+	if err != nil {
+		log.Print(err)
+		return domain.Post{}, err
+	}
+
+	if findPost.UserId != p.UserId {
+		err := errors.New("user id mismatch")
+		log.Print(err)
+		return domain.Post{}, err
+	}
+
 	post, err := s.postRepo.Update(p)
 	if err != nil {
 		log.Print(err)
@@ -64,8 +79,22 @@ func (s postService) Update(p domain.Post) (domain.Post, error) {
 	return post, nil
 }
 
-func (s postService) Delete(id int64) error {
-	err := s.postRepo.Delete(id)
+func (s postService) Delete(id, userId int64) error {
+
+	findPost, err := s.Find(id)
+
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+
+	if findPost.UserId != userId {
+		err = errors.New("user id mismatch")
+		log.Print(err)
+		return err
+	}
+
+	err = s.postRepo.Delete(id)
 	if err != nil {
 		log.Print(err)
 		return err
