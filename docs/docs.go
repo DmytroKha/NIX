@@ -334,8 +334,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/resources.PostDto"
                         }
@@ -439,7 +439,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/resources.CommentDto"
                         }
                     },
                     "400": {
@@ -489,7 +489,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/resources.CommentDto"
                         }
                     },
                     "400": {
@@ -551,7 +551,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/resources.CommentDto"
                         }
                     },
                     "400": {
@@ -611,10 +611,10 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/resources.CommentDto"
                         }
                     },
                     "400": {
@@ -799,9 +799,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "body": {
-                    "type": "string"
-                },
-                "email": {
+                    "description": "Email string ` + "`" + `json:\"email\"` + "`" + `",
                     "type": "string"
                 },
                 "name": {
@@ -853,6 +851,23 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/resources.UserDto"
+                }
+            }
+        },
+        "resources.CommentDto": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "post_id": {
+                    "type": "integer"
                 }
             }
         },

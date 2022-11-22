@@ -27,6 +27,7 @@ import (
 var authService app.AuthService
 var userService app.UserService
 var postService app.PostService
+var commentService app.CommentService
 
 type requestTest struct {
 	name          string
@@ -95,7 +96,7 @@ func TestControllers(t *testing.T) {
 	postController := controllers.NewPostController(postService)
 
 	commentRepository := database.NewCommentRepository(db)
-	commentService := app.NewCommentService(commentRepository, postService)
+	commentService = app.NewCommentService(commentRepository, postService)
 	commentController := controllers.NewCommentController(commentService)
 
 	// Create routes
@@ -109,6 +110,7 @@ func TestControllers(t *testing.T) {
 	iterateOverTests(t, "AuthController", authControllerTests, e, migrator)
 	//iterateOverTests(t, "UserController", userControllerTests, e, migrator)
 	iterateOverTests(t, "PostController", postControllerTests, e, migrator)
+	iterateOverTests(t, "CommentController", commentControllerTests, e, migrator)
 
 }
 

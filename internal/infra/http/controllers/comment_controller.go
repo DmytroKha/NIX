@@ -4,7 +4,7 @@ import (
 	"NIX/internal/app"
 	"NIX/internal/domain"
 	"NIX/internal/infra/http/requests"
-	"errors"
+	"NIX/internal/infra/http/resources"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
@@ -29,7 +29,7 @@ func NewCommentController(s app.CommentService) CommentController {
 // @Produce      json
 // @Param        postId   path      string  true  "Post ID"
 // @Param        input   body      requests.CommentRequest  true  "Comment body"
-// @Success      201  {object}  domain.Comment
+// @Success      201  {object}  resources.CommentDto
 // @Failure      400  {string}  echo.HTTPError
 // @Failure      422  {string}  echo.HTTPError
 // @Failure      500  {string}  echo.HTTPError
@@ -58,12 +58,17 @@ func (c CommentController) Save(ctx echo.Context) error {
 
 	p.PostId = postId
 
+	email := GetUserValueFromJWT(ctx, UserEmailKey)
+	p.Email = email
+
 	createdComment, err := c.commentService.Save(p)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	return ctx.JSON(http.StatusCreated, createdComment)
+	var commentDto resources.CommentDto
+
+	return ctx.JSON(http.StatusCreated, commentDto.DomainToDto(createdComment))
 }
 
 // FindComment godoc
@@ -75,7 +80,7 @@ func (c CommentController) Save(ctx echo.Context) error {
 // @Produce      json
 // @Param        postId   path      string  true  "Post ID"
 // @Param        id   path      string  true  "Comment ID"
-// @Success      200  {object}  domain.Comment
+// @Success      200  {object}  resources.CommentDto
 // @Failure      400  {string}  echo.HTTPError
 // @Failure      404  {string}  echo.HTTPError
 // @Router       /posts/{postId}/comments/{id} [get]
@@ -95,7 +100,9 @@ func (c CommentController) Find(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, err)
 	}
 
-	return ctx.JSON(http.StatusOK, comment)
+	var commentDto resources.CommentDto
+
+	return ctx.JSON(http.StatusOK, commentDto.DomainToDto(comment))
 }
 
 // ListComments godoc
@@ -106,7 +113,7 @@ func (c CommentController) Find(ctx echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Param        postId   path      string  true  "Post ID"
-// @Success      200  {object}  domain.Comment
+// @Success      200  {object}  resources.CommentDto
 // @Failure      400  {string}  echo.HTTPError
 // @Router       /posts/{postId}/comments [get]
 func (c CommentController) FindAll(ctx echo.Context) error {
@@ -125,7 +132,9 @@ func (c CommentController) FindAll(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, err)
 	}
 
-	return ctx.JSON(http.StatusOK, comments)
+	var commentDto resources.CommentDto
+
+	return ctx.JSON(http.StatusOK, commentDto.DomainToDtoCollection(comments))
 }
 
 // UpdateComment godoc
@@ -138,7 +147,7 @@ func (c CommentController) FindAll(ctx echo.Context) error {
 // @Param        postId   path      string  true  "Post ID"
 // @Param        id   path      string  true  "Comment ID"
 // @Param        input   body      requests.CommentRequest  true  "Comment body"
-// @Success      201  {object}  domain.Comment
+// @Success      200  {object}  resources.CommentDto
 // @Failure      400  {string}  echo.HTTPError
 // @Failure      422  {string}  echo.HTTPError
 // @Failure      500  {string}  echo.HTTPError
@@ -176,20 +185,19 @@ func (c CommentController) Update(ctx echo.Context) error {
 	}
 
 	email := GetUserValueFromJWT(ctx, UserEmailKey)
-	if email != p.Email {
-		err = errors.New("user email mismatch")
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
 
 	p.PostId = postId
 	p.Id = id
+	p.Email = email
 
-	createdComment, err := c.commentService.Update(p)
+	updatedComment, err := c.commentService.Update(p)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, err)
 	}
 
-	return ctx.JSON(http.StatusCreated, createdComment)
+	var commentDto resources.CommentDto
+
+	return ctx.JSON(http.StatusOK, commentDto.DomainToDto(updatedComment))
 }
 
 // DeleteComment godoc

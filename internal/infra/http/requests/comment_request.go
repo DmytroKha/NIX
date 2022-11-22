@@ -5,9 +5,9 @@ import "NIX/internal/domain"
 type CommentRequest struct {
 	//PostId int64  `json:"postId,omitempty"`
 	//Id     int64  `json:"id,omitempty"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Body  string `json:"body"`
+	Name string `json:"name" validate:"required"`
+	//Email string `json:"email"`
+	Body string `json:"body" validate:"required"`
 }
 
 func (r CommentRequest) ToDomainModel() (domain.Comment, error) {
@@ -15,7 +15,7 @@ func (r CommentRequest) ToDomainModel() (domain.Comment, error) {
 	//cmt.Id = r.Id
 	//cmt.PostId = r.PostId
 	cmt.Name = r.Name
-	cmt.Email = r.Email
+	//cmt.Email = r.Email
 	cmt.Body = r.Body
 
 	return cmt, nil

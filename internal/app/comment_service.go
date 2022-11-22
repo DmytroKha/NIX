@@ -65,9 +65,14 @@ func (s commentService) FindAll(postId int64, p domain.Pagination) (domain.Comme
 }
 
 func (s commentService) Update(p domain.Comment) (domain.Comment, error) {
-	_, err := s.commentRepo.Find(p.PostId, p.Id)
+	post, err := s.commentRepo.Find(p.PostId, p.Id)
 	if err != nil {
 		log.Print(err)
+		return domain.Comment{}, err
+	}
+
+	if p.Email != post.Email {
+		err = errors.New("user email mismatch")
 		return domain.Comment{}, err
 	}
 

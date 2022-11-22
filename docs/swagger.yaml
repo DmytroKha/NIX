@@ -27,8 +27,7 @@ definitions:
   requests.CommentRequest:
     properties:
       body:
-        type: string
-      email:
+        description: Email string `json:"email"`
         type: string
       name:
         description: |-
@@ -68,6 +67,17 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/resources.UserDto'
+    type: object
+  resources.CommentDto:
+    properties:
+      body:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      post_id:
+        type: integer
     type: object
   resources.GoogleUrlDto:
     properties:
@@ -332,8 +342,8 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
             $ref: '#/definitions/resources.PostDto'
         "400":
@@ -370,7 +380,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.Comment'
+            $ref: '#/definitions/resources.CommentDto'
         "400":
           description: Bad Request
           schema:
@@ -402,7 +412,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/domain.Comment'
+            $ref: '#/definitions/resources.CommentDto'
         "400":
           description: Bad Request
           schema:
@@ -477,7 +487,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.Comment'
+            $ref: '#/definitions/resources.CommentDto'
         "400":
           description: Bad Request
           schema:
@@ -515,10 +525,10 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
-            $ref: '#/definitions/domain.Comment'
+            $ref: '#/definitions/resources.CommentDto'
         "400":
           description: Bad Request
           schema:

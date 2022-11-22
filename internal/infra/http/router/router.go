@@ -26,6 +26,7 @@ func New(
 	middlewares.SetMainMiddlewares(e)
 	middlewares.SetApiMiddlewares(api)
 	middlewares.SetJWTMiddlewares(posts, cf)
+	middlewares.SetJWTMiddlewares(comments, cf)
 
 	http.MainGroup(e, authController)
 	http.AuthGroup(auth, authController)
