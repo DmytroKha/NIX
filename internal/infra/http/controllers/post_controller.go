@@ -5,7 +5,6 @@ import (
 	"NIX/internal/domain"
 	"NIX/internal/infra/http/requests"
 	"NIX/internal/infra/http/resources"
-
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"

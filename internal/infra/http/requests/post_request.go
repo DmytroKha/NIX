@@ -1,6 +1,8 @@
 package requests
 
-import "NIX/internal/domain"
+import (
+	"NIX/internal/domain"
+)
 
 type PostRequest struct {
 	//UserId int64 `json:"userId,omitempty"`

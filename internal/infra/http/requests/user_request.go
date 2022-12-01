@@ -1,6 +1,8 @@
 package requests
 
-import "NIX/internal/domain"
+import (
+	"NIX/internal/domain"
+)
 
 type UserRequest struct {
 	Email    string `json:"email" validate:"required,email"`

@@ -1,6 +1,8 @@
 package requests
 
-import "NIX/internal/domain"
+import (
+	"NIX/internal/domain"
+)
 
 type CommentRequest struct {
 	//PostId int64  `json:"postId,omitempty"`

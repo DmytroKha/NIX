@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"NIX/internal/app"
+	"NIX/internal/infra/http/requests"
+	"NIX/internal/infra/http/resources"
 	"fmt"
 	"github.com/goccy/go-json"
 
@@ -12,9 +15,6 @@ import (
 	"os"
 	"strconv"
 
-	"NIX/internal/app"
-	"NIX/internal/infra/http/requests"
-	"NIX/internal/infra/http/resources"
 	"github.com/labstack/echo/v4"
 )
 

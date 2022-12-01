@@ -1,7 +1,7 @@
 //go:build integration
 // +build integration
 
-package controllers_test
+package controllers_test_test
 
 import (
 	"NIX/internal/domain"
