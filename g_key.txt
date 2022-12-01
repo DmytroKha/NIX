@@ -1,0 +1,6 @@
+Client ID
+410752017225-ne1sg4eoe3hmkg136citn89vm62p5dpp.apps.googleusercontent.com
+Client secret
+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
+Creation date
+October 7, 2022 at 4:49:42 PM GMT+3

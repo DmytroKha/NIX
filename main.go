@@ -1,107 +1,122 @@
 package main
 
 import (
+	"NIX/config"
+	_ "NIX/docs"
+	"NIX/internal/app"
+	"NIX/internal/infra/database"
+	"NIX/internal/infra/http/controllers"
+	"NIX/internal/infra/http/router"
 	"fmt"
-	"net/http"
-	"strconv"
-	"sync"
+	_ "github.com/go-sql-driver/mysql"
+	mysqlG "gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"log"
 )
 
-/*
-type Message struct {
-	UserId int    `json:"userId"`
-	Id     int    `json:"id"`
-	Title  string `json:"title"`
-	Body   string `json:"body"`
-}
-*/
+// @title       NIX_Education API
+// @version     1.0
+// @description API Server for NIX_Education application.
 
+// @host     localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in                         header
+// @name                       Authorization
 func main() {
-	//1.	Налаштувати середовище розробки.
-	//2.	Робота з репозиторієм.
-	fmt.Println("Hello,NIX Education")
 
-	//3.	Отримання інформації з мережі. Є сервіс https://jsonplaceholder.typicode.com/ .
+	//BEGINNER. 1.	Налаштувати середовище розробки.
+	//beginner.printHello()
+
+	//BEGINNER. 2.	Робота з репозиторієм.
+	//https://github.com/DmytroKha/NIX
+
+	//BEGINNER. 3.	Отримання інформації з мережі. Є сервіс https://jsonplaceholder.typicode.com/ .
 	//представляє REST API для отримання даних у форматі JSON. Сайт надає доступ до таких ресурсів:
-	/*
-		tempData := strings.NewReader(`{}`)
+	//beginner.getNetInformation()
 
-		req, err := http.NewRequest("GET", "https://jsonplaceholder.typicode.com/posts", tempData)
+	//BEGINNER. 4.	Горутини.
+	//beginner.useGoroutine()
 
-		if err != nil {
-			log.Fatalln(err)
-		}
+	//BEGINNER. 5.	Файлова система
+	//beginner.useFileSystem()
 
-		client := &http.Client{}
-		resp, err := client.Do(req)
+	//BEGINNER. 6.	Робота с БД
+	//beginner.useDB()
 
-		if err != nil {
-			log.Fatalln(err)
-		}
+	//TRAINEE. 1.	Сodestyle
+	//golangci-lint run
 
-		defer func() {
-			_ = resp.Body.Close()
-		}()
+	//TRAINEE. 2.	Gitflow
+	//???
 
-		if resp.StatusCode != 200 {
-			err = fmt.Errorf("bad request")
-			log.Fatalln(err)
-		}
+	//TRAINEE. 3.	GORM
+	//trainee_pt_one.useDBWithGORM()
 
-		dec := json.NewDecoder(resp.Body)
+	//TRAINEE. 4.	Створення REST API
+	//trainee_pt_one.createRESTAPI()
 
-		var m []Message
+	//TRAINEE. 5.	Echo framework
+	echoRESTAPI()
 
-		err = dec.Decode(&m)
+	//TRAINEE. 6.	Swagger specification
+	//Додай swagger до API. Використовуй пакет - swag
+	//http://localhost:8080/swagger/index.html
 
-		if err != nil {
-			log.Fatalln(err)
-		}
+	//TRAINEE. 7. OAuth 2.0 	Додай можливість реєстрації, авторизації користувачів,
+	//використовуючи стандарт JWT; Додай авторизацію + реєстрацію через Google використовуючи протокол OAuth2.0.
+	//Тільки авторизовані користувачі можуть писати пости та залишати коментарі,
+	//кожний пост і комент прив'язаний до будь-якого користувача. Використовуй бібліотеку — golang/oauth2
 
-		data, err := json.MarshalIndent(m, "", "    ")
+	//TRAINEE. 8. Тестування	Напиши тести для свого API. Використовуй стандартну бібліотеку для тестування - testing
 
-		if err != nil {
-			log.Fatalln(err)
-		}
-		fmt.Printf("%s\n", data)
-	*/
+}
 
-	//4.	Горутини.
-	wg := new(sync.WaitGroup)
-	var totalString []string
-	n := 5
-	wg.Add(n)
+func echoRESTAPI() {
 
-	for i := 1; i <= n; i++ {
-		b := i
-		go func(b int) {
-			s := "https://jsonplaceholder.typicode.com/posts/" + strconv.Itoa(b)
-			resp, err := http.Get(s)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			defer func() {
-				_ = resp.Body.Close()
-			}()
+	var conf = config.GetConfiguration()
 
-			for true {
-				bs := make([]byte, 1014)
-				j, err := resp.Body.Read(bs)
-				totalString = append(totalString, string(bs[:j]))
-				if j == 0 || err != nil {
-					break
-				}
-			}
-			defer wg.Done()
-		}(b)
+	err := database.Migrate(conf)
+	if err != nil {
+		log.Fatalf("Unable to apply migrations: %q\n", err)
 	}
 
-	wg.Wait()
-	for i := range totalString {
-		fmt.Println(totalString[i])
+	dsn := fmt.Sprintf("%v:%v@tcp(%v)/%v",
+		conf.DatabaseUser,
+		conf.DatabasePassword,
+		conf.DatabaseHost,
+		conf.DatabaseName)
+	db, err := gorm.Open(mysqlG.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatalln(err)
 	}
 
-	//5.	Файлова система
+	userRepository := database.NewUserRepository(db)
+	userService := app.NewUserService(userRepository)
+	userController := controllers.NewUserController(userService)
 
+	authService := app.NewAuthService(userService, conf)
+	authController := controllers.NewAuthController(authService, userService)
+
+	postRepository := database.NewPostRepository(db)
+	postService := app.NewPostService(postRepository)
+	postController := controllers.NewPostController(postService)
+
+	commentRepository := database.NewCommentRepository(db)
+	commentService := app.NewCommentService(commentRepository, postService)
+	commentController := controllers.NewCommentController(commentService)
+
+	e := router.New(
+		userController,
+		authController,
+		postController,
+		commentController,
+		conf)
+
+	// service start at port :8080
+	err = e.Start(":8080")
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
