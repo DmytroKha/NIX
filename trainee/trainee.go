@@ -1,4 +1,4 @@
-package trainee_pt_one
+package trainee
 
 import (
 	"NIX/internal/domain"

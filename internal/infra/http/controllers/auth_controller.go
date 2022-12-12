@@ -140,16 +140,6 @@ func (c AuthController) Login(ctx echo.Context) error {
 // @Router       /auth/loginGoogle [post]
 func (c AuthController) LoginGoogle(ctx echo.Context) error {
 
-	/*err := redirectGoogleUrl(ctx)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	var googleUrlDto resources.GoogleUrlDto
-
-
-	return ctx.JSON(http.StatusCreated, googleUrlDto.DomainToDto(url))
-	*/
 	url := googleOauthConfig.AuthCodeURL(oauthStateString)
 	err := ctx.Redirect(http.StatusTemporaryRedirect, url)
 	if err != nil {
@@ -157,20 +147,8 @@ func (c AuthController) LoginGoogle(ctx echo.Context) error {
 	}
 
 	return nil
-	//var googleUrlDto resources.GoogleUrlDto
-
-	//return ctx.JSON(http.StatusCreated, googleUrlDto.DomainToDto(url))
 }
 
-func redirectGoogleUrl(ctx echo.Context) error {
-	url := googleOauthConfig.AuthCodeURL(oauthStateString)
-	//err := ctx.Redirect(http.StatusTemporaryRedirect, url)
-	//if err != nil {
-
-	//	return echo.NewHTTPError(http.StatusBadRequest, err)
-	//}
-	return ctx.Redirect(http.StatusTemporaryRedirect, url)
-}
 func (c AuthController) Callback(ctx echo.Context) error {
 
 	if ctx.FormValue("state") != oauthStateString {
