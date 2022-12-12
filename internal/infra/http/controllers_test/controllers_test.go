@@ -4,12 +4,6 @@
 package controllers_test_test
 
 import (
-	"NIX/config"
-	"NIX/internal/app"
-	"NIX/internal/domain"
-	"NIX/internal/infra/database"
-	"NIX/internal/infra/http/controllers"
-	"NIX/internal/infra/http/router"
 	"bytes"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
@@ -19,6 +13,12 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"nix_education/config"
+	"nix_education/internal/app"
+	"nix_education/internal/domain"
+	"nix_education/internal/infra/database"
+	"nix_education/internal/infra/http/controllers"
+	"nix_education/internal/infra/http/router"
 	"os"
 	"testing"
 	"time"

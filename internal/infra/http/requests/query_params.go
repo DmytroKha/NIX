@@ -1,10 +1,10 @@
 package requests
 
 import (
-	"NIX/internal/domain"
 	"fmt"
 	"log"
 	"net/http"
+	"nix_education/internal/domain"
 	"strconv"
 )
 

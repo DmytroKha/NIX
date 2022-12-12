@@ -1,11 +1,12 @@
 package controllers
 
 import (
-	"NIX/internal/app"
-	"NIX/internal/infra/http/requests"
-	"NIX/internal/infra/http/resources"
+	"context"
 	"fmt"
 	"github.com/goccy/go-json"
+	"nix_education/internal/app"
+	"nix_education/internal/infra/http/requests"
+	"nix_education/internal/infra/http/resources"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -155,7 +156,7 @@ func (c AuthController) Callback(ctx echo.Context) error {
 		return fmt.Errorf("invalid oauth state")
 	}
 
-	token, err := googleOauthConfig.Exchange(oauth2.NoContext, ctx.FormValue("code"))
+	token, err := googleOauthConfig.Exchange(context.Background(), ctx.FormValue("code"))
 	if err != nil {
 		//return fmt.Errorf("code exchange failed: %s", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, err)

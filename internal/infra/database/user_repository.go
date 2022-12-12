@@ -1,8 +1,8 @@
 package database
 
 import (
-	"NIX/internal/domain"
 	"gorm.io/gorm"
+	"nix_education/internal/domain"
 )
 
 const UserTableName = "users"

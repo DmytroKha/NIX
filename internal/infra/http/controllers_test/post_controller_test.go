@@ -4,11 +4,11 @@
 package controllers_test_test
 
 import (
-	"NIX/internal/domain"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
 	"log"
 	"net/http"
+	"nix_education/internal/domain"
 )
 
 var postControllerTests = []*requestTest{

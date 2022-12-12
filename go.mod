@@ -1,4 +1,4 @@
-module NIX
+module nix_education
 
 go 1.18
 

@@ -1,10 +1,10 @@
 package middlewares
 
 import (
-	"NIX/config"
-	"NIX/internal/infra/http/controllers"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"nix_education/config"
+	"nix_education/internal/infra/http/controllers"
 )
 
 func SetJWTMiddlewares(g *echo.Group, cf config.Configuration) {

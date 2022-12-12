@@ -1,8 +1,8 @@
 package http
 
 import (
-	"NIX/internal/infra/http/controllers"
 	"github.com/labstack/echo/v4"
+	"nix_education/internal/infra/http/controllers"
 )
 
 func UsersGroup(g *echo.Group, userController controllers.UserController) {

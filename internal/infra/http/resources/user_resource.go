@@ -1,8 +1,8 @@
 package resources
 
 import (
-	"NIX/internal/domain"
 	jwt "github.com/dgrijalva/jwt-go"
+	"nix_education/internal/domain"
 )
 
 type UserDto struct {

@@ -1,10 +1,10 @@
 package database
 
 import (
-	"NIX/config"
 	"errors"
 	"fmt"
 	"log"
+	"nix_education/config"
 	"os"
 	"strconv"
 

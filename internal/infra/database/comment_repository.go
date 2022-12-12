@@ -1,9 +1,9 @@
 package database
 
 import (
-	"NIX/internal/domain"
 	"gorm.io/gorm"
 	"math"
+	"nix_education/internal/domain"
 )
 
 const CommentTableName = "comments"

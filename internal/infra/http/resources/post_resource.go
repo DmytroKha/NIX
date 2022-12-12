@@ -1,7 +1,7 @@
 package resources
 
 import (
-	"NIX/internal/domain"
+	"nix_education/internal/domain"
 )
 
 type PostDto struct {

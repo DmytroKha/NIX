@@ -1,7 +1,6 @@
 package trainee
 
 import (
-	"NIX/internal/domain"
 	"fmt"
 	"github.com/goccy/go-json"
 	mysqlG "gorm.io/driver/mysql"
@@ -9,10 +8,12 @@ import (
 	"gorm.io/gorm/clause"
 	"log"
 	"net/http"
+	"nix_education/internal/domain"
 	"regexp"
 	"sync"
 )
 
+//nolint
 var (
 	listPostRe   = regexp.MustCompile(`^\/posts[\/]*$`)
 	getPostRe    = regexp.MustCompile(`^\/posts\/(\d+)$`)
@@ -27,14 +28,17 @@ var (
 	deleteCommentRe = regexp.MustCompile(`^\/comments\/(\d+)$`)
 )
 
+//nolint
 type postHendler struct {
 	store *gorm.DB
 }
 
+//nolint
 type commentHendler struct {
 	store *gorm.DB
 }
 
+//nolint
 func useDBWithGORM() {
 
 	dsn := "root:root@tcp(127.0.0.1:3306)/nix_education"
@@ -108,6 +112,7 @@ func useDBWithGORM() {
 
 }
 
+//nolint
 func createRESTAPI() {
 	dsn := "root:root@tcp(127.0.0.1:3306)/nix_education"
 	db, err := gorm.Open(mysqlG.Open(dsn), &gorm.Config{})
@@ -125,9 +130,10 @@ func createRESTAPI() {
 	mux.Handle("/comments", commentH)
 	mux.Handle("/comments/", commentH)
 
-	http.ListenAndServe("localhost:8080", mux)
+	log.Fatalln(http.ListenAndServe("localhost:8080", mux))
 }
 
+//nolint
 func (h *postHendler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	switch {
@@ -152,6 +158,7 @@ func (h *postHendler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//nolint
 func (h *commentHendler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	switch {
@@ -176,6 +183,7 @@ func (h *commentHendler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//nolint
 func (h *postHendler) List(w http.ResponseWriter, r *http.Request) {
 
 	var posts []domain.Post
@@ -183,7 +191,7 @@ func (h *postHendler) List(w http.ResponseWriter, r *http.Request) {
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("posts not found"))
+		log.Println(w.Write([]byte("posts not found")))
 		return
 	}
 
@@ -194,10 +202,11 @@ func (h *postHendler) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(jsonBytes)
+	log.Println(w.Write(jsonBytes))
 
 }
 
+//nolint
 func (h *commentHendler) List(w http.ResponseWriter, r *http.Request) {
 
 	var comments []domain.Comment
@@ -205,7 +214,7 @@ func (h *commentHendler) List(w http.ResponseWriter, r *http.Request) {
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("comments not found"))
+		log.Println(w.Write([]byte("comments not found")))
 		return
 	}
 
@@ -216,10 +225,11 @@ func (h *commentHendler) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(jsonBytes)
+	log.Println(w.Write(jsonBytes))
 
 }
 
+//nolint
 func (h *postHendler) Get(w http.ResponseWriter, r *http.Request) {
 
 	matches := getPostRe.FindStringSubmatch(r.URL.Path)
@@ -233,7 +243,7 @@ func (h *postHendler) Get(w http.ResponseWriter, r *http.Request) {
 
 	if post.Id == 0 {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("post not found"))
+		log.Println(w.Write([]byte("post not found")))
 		return
 	}
 
@@ -244,9 +254,10 @@ func (h *postHendler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(jsonBytes)
+	log.Println(w.Write(jsonBytes))
 }
 
+//nolint
 func (h *commentHendler) Get(w http.ResponseWriter, r *http.Request) {
 
 	matches := getCommentRe.FindStringSubmatch(r.URL.Path)
@@ -260,7 +271,7 @@ func (h *commentHendler) Get(w http.ResponseWriter, r *http.Request) {
 
 	if comment.Id == 0 {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("comment not found"))
+		log.Println(w.Write([]byte("comment not found")))
 		return
 	}
 
@@ -271,9 +282,10 @@ func (h *commentHendler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(jsonBytes)
+	log.Println(w.Write(jsonBytes))
 }
 
+//nolint
 func (h *postHendler) Create(w http.ResponseWriter, r *http.Request) {
 
 	var post, postNew domain.Post
@@ -286,7 +298,7 @@ func (h *postHendler) Create(w http.ResponseWriter, r *http.Request) {
 
 	if post.Id != 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("post already exist"))
+		log.Println(w.Write([]byte("post already exist")))
 		return
 	}
 
@@ -294,13 +306,14 @@ func (h *postHendler) Create(w http.ResponseWriter, r *http.Request) {
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("post not created"))
+		log.Println(w.Write([]byte("post not created")))
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 }
 
+//nolint
 func (h *commentHendler) Create(w http.ResponseWriter, r *http.Request) {
 
 	var comment, commentNew domain.Comment
@@ -313,7 +326,7 @@ func (h *commentHendler) Create(w http.ResponseWriter, r *http.Request) {
 
 	if comment.Id != 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("comment already exist"))
+		log.Println(w.Write([]byte("comment already exist")))
 		return
 	}
 
@@ -321,13 +334,14 @@ func (h *commentHendler) Create(w http.ResponseWriter, r *http.Request) {
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("comment not created"))
+		log.Println(w.Write([]byte("comment not created")))
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 }
 
+//nolint
 func (h *postHendler) Update(w http.ResponseWriter, r *http.Request) {
 
 	matches := updatePostRe.FindStringSubmatch(r.URL.Path)
@@ -341,7 +355,7 @@ func (h *postHendler) Update(w http.ResponseWriter, r *http.Request) {
 
 	if post.Id == 0 {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("post not found"))
+		log.Println(w.Write([]byte("post not found")))
 		return
 	}
 
@@ -362,9 +376,10 @@ func (h *postHendler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(jsonBytes)
+	log.Println(w.Write(jsonBytes))
 }
 
+//nolint
 func (h *commentHendler) Update(w http.ResponseWriter, r *http.Request) {
 
 	matches := updateCommentRe.FindStringSubmatch(r.URL.Path)
@@ -378,7 +393,7 @@ func (h *commentHendler) Update(w http.ResponseWriter, r *http.Request) {
 
 	if comment.Id == 0 {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("post not found"))
+		log.Println(w.Write([]byte("post not found")))
 		return
 	}
 
@@ -399,9 +414,10 @@ func (h *commentHendler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(jsonBytes)
+	log.Println(w.Write(jsonBytes))
 }
 
+//nolint
 func (h *postHendler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	matches := deletePostRe.FindStringSubmatch(r.URL.Path)
@@ -416,13 +432,13 @@ func (h *postHendler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("post not deleted"))
+		log.Println(w.Write([]byte("post not deleted")))
 		return
 	}
 
 	if result.Error == nil && result.RowsAffected == 0 {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("post not found"))
+		log.Println(w.Write([]byte("post not found")))
 		return
 	}
 
@@ -430,6 +446,7 @@ func (h *postHendler) Delete(w http.ResponseWriter, r *http.Request) {
 
 }
 
+//nolint
 func (h *commentHendler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	matches := deleteCommentRe.FindStringSubmatch(r.URL.Path)
@@ -444,13 +461,13 @@ func (h *commentHendler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("comment not deleted"))
+		log.Println(w.Write([]byte("comment not deleted")))
 		return
 	}
 
 	if result.Error == nil && result.RowsAffected == 0 {
 		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("comment not found"))
+		log.Println(w.Write([]byte("comment not found")))
 		return
 	}
 
@@ -458,12 +475,14 @@ func (h *commentHendler) Delete(w http.ResponseWriter, r *http.Request) {
 
 }
 
+//nolint
 func internalServerError(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusInternalServerError)
-	w.Write([]byte("internal server error"))
+	log.Println(w.Write([]byte("internal server error")))
 }
 
+//nolint
 func notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
-	w.Write([]byte("not found"))
+	log.Println(w.Write([]byte("not found")))
 }

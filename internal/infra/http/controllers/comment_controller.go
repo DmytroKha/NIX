@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"NIX/internal/app"
-	"NIX/internal/domain"
-	"NIX/internal/infra/http/requests"
-	"NIX/internal/infra/http/resources"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"nix_education/internal/app"
+	"nix_education/internal/domain"
+	"nix_education/internal/infra/http/requests"
+	"nix_education/internal/infra/http/resources"
 	"strconv"
 )
 
