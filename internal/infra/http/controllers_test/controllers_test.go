@@ -108,7 +108,7 @@ func TestControllers(t *testing.T) {
 		conf)
 
 	iterateOverTests(t, "AuthController", authControllerTests, e, migrator)
-	//iterateOverTests(t, "UserController", userControllerTests, e, migrator)
+	iterateOverTests(t, "UserController", userControllerTests, e, migrator)
 	iterateOverTests(t, "PostController", postControllerTests, e, migrator)
 	iterateOverTests(t, "CommentController", commentControllerTests, e, migrator)
 

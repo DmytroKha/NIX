@@ -16,7 +16,7 @@ var postControllerTests = []*requestTest{
 		"Get all posts for user",
 		func(req *http.Request, migrator *migrate.Migrate) {
 			resetDB(migrator)
-			userModelMocker(2)
+			userModelMocker(2, "123456")
 			postModelMocker(4, 1)
 			HeaderTokenMock(req, 1, "email1@example.com")
 		},

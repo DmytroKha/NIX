@@ -16,7 +16,7 @@ var commentControllerTests = []*requestTest{
 		"Get all comments for post",
 		func(req *http.Request, migrator *migrate.Migrate) {
 			resetDB(migrator)
-			userModelMocker(2)
+			userModelMocker(2, "123456")
 			postModelMocker(4, 1)
 			commentModelMocker(4, 1, "email1@example.com")
 			HeaderTokenMock(req, 1, "email1@example.com")

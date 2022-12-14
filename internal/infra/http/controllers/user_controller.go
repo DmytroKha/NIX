@@ -18,31 +18,6 @@ func NewUserController(us app.UserService) UserController {
 	}
 }
 
-func (c UserController) Save(ctx echo.Context) error {
-	var user requests.UserRequest
-	err := ctx.Bind(&user)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	err = ctx.Validate(&user)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
-	}
-
-	u, err := user.ToDomainModel()
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	createdUser, err := c.userService.Save(u)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-
-	return ctx.JSON(http.StatusCreated, createdUser)
-}
-
 // SetPass godoc
 // @Summary      Set password for user google acc
 // @Security     ApiKeyAuth
