@@ -28,10 +28,12 @@ type Comment struct {
 	Body   string `json:"body"`
 }
 
+//nolint
 func printHello() {
 	fmt.Println("Hello,NIX Education")
 }
 
+//nolint
 func getNetInformation() {
 	tempData := strings.NewReader(`{}`)
 
@@ -75,6 +77,7 @@ func getNetInformation() {
 	fmt.Printf("%s\n", data)
 }
 
+//nolint
 func useGoroutine() {
 	wg := new(sync.WaitGroup)
 	var totalString []string
@@ -112,6 +115,7 @@ func useGoroutine() {
 	}
 }
 
+//nolint
 func useFileSystem() {
 	wg := new(sync.WaitGroup)
 	n := 5
@@ -161,6 +165,7 @@ func useFileSystem() {
 
 }
 
+//nolint
 func useDB() {
 
 	s := "https://jsonplaceholder.typicode.com/posts?userId=7"

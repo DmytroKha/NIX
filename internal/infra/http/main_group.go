@@ -1,10 +1,10 @@
 package http
 
 import (
-	"NIX/internal/infra/http/controllers"
-	"NIX/internal/infra/http/requests"
 	"github.com/labstack/echo/v4"
 	echoSwagger "github.com/swaggo/echo-swagger"
+	"nix_education/internal/infra/http/controllers"
+	"nix_education/internal/infra/http/requests"
 )
 
 func MainGroup(e *echo.Echo, authController controllers.AuthController) {

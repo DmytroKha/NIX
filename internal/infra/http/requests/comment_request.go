@@ -1,7 +1,7 @@
 package requests
 
 import (
-	"NIX/internal/domain"
+	"nix_education/internal/domain"
 )
 
 type CommentRequest struct {

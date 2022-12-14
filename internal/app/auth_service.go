@@ -1,13 +1,13 @@
 package app
 
 import (
-	"NIX/config"
-	"NIX/internal/domain"
-	"NIX/internal/infra/http/resources"
 	"errors"
 	jwt "github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"nix_education/config"
+	"nix_education/internal/domain"
+	"nix_education/internal/infra/http/resources"
 	"strconv"
 	"time"
 )

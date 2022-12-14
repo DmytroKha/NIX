@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"NIX/internal/app"
-	"NIX/internal/infra/http/requests"
-	"NIX/internal/infra/http/resources"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"nix_education/internal/app"
+	"nix_education/internal/infra/http/requests"
+	"nix_education/internal/infra/http/resources"
 )
 
 type UserController struct {
@@ -16,31 +16,6 @@ func NewUserController(us app.UserService) UserController {
 	return UserController{
 		userService: us,
 	}
-}
-
-func (c UserController) Save(ctx echo.Context) error {
-	var user requests.UserRequest
-	err := ctx.Bind(&user)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	err = ctx.Validate(&user)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
-	}
-
-	u, err := user.ToDomainModel()
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	createdUser, err := c.userService.Save(u)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
-	}
-
-	return ctx.JSON(http.StatusCreated, createdUser)
 }
 
 // SetPass godoc

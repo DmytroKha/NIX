@@ -1,11 +1,11 @@
 package router
 
 import (
-	"NIX/config"
-	"NIX/internal/infra/http"
-	"NIX/internal/infra/http/controllers"
-	"NIX/internal/infra/http/middlewares"
 	"github.com/labstack/echo/v4"
+	"nix_education/config"
+	"nix_education/internal/infra/http"
+	"nix_education/internal/infra/http/controllers"
+	"nix_education/internal/infra/http/middlewares"
 )
 
 func New(

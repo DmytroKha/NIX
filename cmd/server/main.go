@@ -1,17 +1,17 @@
 package main
 
 import (
-	"NIX/config"
-	_ "NIX/docs"
-	"NIX/internal/app"
-	"NIX/internal/infra/database"
-	"NIX/internal/infra/http/controllers"
-	"NIX/internal/infra/http/router"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	mysqlG "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
+	"nix_education/config"
+	_ "nix_education/docs"
+	"nix_education/internal/app"
+	"nix_education/internal/infra/database"
+	"nix_education/internal/infra/http/controllers"
+	"nix_education/internal/infra/http/router"
 )
 
 // @title       NIX_Education API
@@ -52,10 +52,10 @@ func main() {
 	//???
 
 	//TRAINEE. 3.	GORM
-	//trainee_pt_one.useDBWithGORM()
+	//trainee.useDBWithGORM()
 
 	//TRAINEE. 4.	Створення REST API
-	//trainee_pt_one.createRESTAPI()
+	//trainee.createRESTAPI()
 
 	//TRAINEE. 5.	Echo framework
 	echoRESTAPI()

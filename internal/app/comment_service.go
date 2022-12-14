@@ -1,10 +1,10 @@
 package app
 
 import (
-	"NIX/internal/domain"
-	"NIX/internal/infra/database"
 	"errors"
 	"log"
+	"nix_education/internal/domain"
+	"nix_education/internal/infra/database"
 )
 
 type CommentService interface {
