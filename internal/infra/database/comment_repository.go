@@ -16,6 +16,7 @@ type comment struct {
 	Body   string
 }
 
+//go:generate mockery --dir . --name CommentRepository --output ./mocks
 type CommentRepository interface {
 	Save(comment domain.Comment) (domain.Comment, error)
 	Find(postId, id int64) (domain.Comment, error)

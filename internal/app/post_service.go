@@ -7,6 +7,7 @@ import (
 	"nix_education/internal/infra/database"
 )
 
+//go:generate mockery --dir . --name PostService --output ./mocks
 type PostService interface {
 	Save(post domain.Post) (domain.Post, error)
 	Update(post domain.Post) (domain.Post, error)

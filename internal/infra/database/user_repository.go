@@ -14,6 +14,7 @@ type user struct {
 	Password string
 }
 
+//go:generate mockery --dir . --name UserRepository --output ./mocks
 type UserRepository interface {
 	Save(user domain.User) (domain.User, error)
 	Update(user domain.User) (domain.User, error)

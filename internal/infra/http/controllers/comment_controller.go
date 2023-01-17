@@ -27,6 +27,7 @@ func NewCommentController(s app.CommentService) CommentController {
 // @Tags         comments
 // @Accept       json
 // @Produce      json
+// @Produce      xml
 // @Param        postId   path      string  true  "Post ID"
 // @Param        input   body      requests.CommentRequest  true  "Comment body"
 // @Success      201  {object}  resources.CommentDto
@@ -78,6 +79,7 @@ func (c CommentController) Save(ctx echo.Context) error {
 // @Tags         comments
 // @Accept       json
 // @Produce      json
+// @Produce      xml
 // @Param        postId   path      string  true  "Post ID"
 // @Param        id   path      string  true  "Comment ID"
 // @Success      200  {object}  resources.CommentDto
@@ -112,6 +114,7 @@ func (c CommentController) Find(ctx echo.Context) error {
 // @Tags         comments
 // @Accept       json
 // @Produce      json
+// @Produce      xml
 // @Param        postId   path      string  true  "Post ID"
 // @Success      200  {object}  resources.CommentDto
 // @Failure      400  {string}  echo.HTTPError
@@ -144,6 +147,7 @@ func (c CommentController) FindAll(ctx echo.Context) error {
 // @Tags         comments
 // @Accept       json
 // @Produce      json
+// @Produce      xml
 // @Param        postId   path      string  true  "Post ID"
 // @Param        id   path      string  true  "Comment ID"
 // @Param        input   body      requests.CommentRequest  true  "Comment body"
@@ -207,6 +211,7 @@ func (c CommentController) Update(ctx echo.Context) error {
 // @Tags         comments
 // @Accept       json
 // @Produce      json
+// @Produce      xml
 // @Param        postId   path      string  true  "Post ID"
 // @Param        id   path      string  true  "Comment ID"
 // @Success      200  {object}  domain.Comment

@@ -15,6 +15,7 @@ type post struct {
 	Body   string
 }
 
+//go:generate mockery --dir . --name PostRepository --output ./mocks
 type PostRepository interface {
 	Save(post domain.Post) (domain.Post, error)
 	Find(id int64) (domain.Post, error)

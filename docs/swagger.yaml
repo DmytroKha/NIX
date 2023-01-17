@@ -34,6 +34,9 @@ definitions:
           PostId int64  `json:"postId,omitempty"`
           Id     int64  `json:"id,omitempty"`
         type: string
+    required:
+    - body
+    - name
     type: object
   requests.PostRequest:
     properties:
@@ -125,6 +128,7 @@ paths:
           $ref: '#/definitions/requests.UserRequest'
       produces:
       - application/json
+      - text/xml
       responses:
         "200":
           description: OK
@@ -152,6 +156,7 @@ paths:
       description: log in user with Google (1)
       produces:
       - application/json
+      - text/xml
       responses:
         "201":
           description: Created
@@ -186,6 +191,7 @@ paths:
           $ref: '#/definitions/requests.UserRequest'
       produces:
       - application/json
+      - text/xml
       responses:
         "201":
           description: Created
@@ -213,6 +219,7 @@ paths:
       description: get all posts
       produces:
       - application/json
+      - text/xml
       responses:
         "200":
           description: OK
@@ -240,6 +247,7 @@ paths:
           $ref: '#/definitions/requests.PostRequest'
       produces:
       - application/json
+      - text/xml
       responses:
         "201":
           description: Created
@@ -275,6 +283,7 @@ paths:
         type: string
       produces:
       - application/json
+      - text/xml
       responses:
         "200":
           description: OK
@@ -305,6 +314,7 @@ paths:
         type: string
       produces:
       - application/json
+      - text/xml
       responses:
         "200":
           description: OK
@@ -341,6 +351,7 @@ paths:
           $ref: '#/definitions/requests.PostRequest'
       produces:
       - application/json
+      - text/xml
       responses:
         "200":
           description: OK
@@ -376,6 +387,7 @@ paths:
         type: string
       produces:
       - application/json
+      - text/xml
       responses:
         "200":
           description: OK
@@ -408,6 +420,7 @@ paths:
           $ref: '#/definitions/requests.CommentRequest'
       produces:
       - application/json
+      - text/xml
       responses:
         "201":
           description: Created
@@ -448,6 +461,7 @@ paths:
         type: string
       produces:
       - application/json
+      - text/xml
       responses:
         "200":
           description: OK
@@ -483,6 +497,7 @@ paths:
         type: string
       produces:
       - application/json
+      - text/xml
       responses:
         "200":
           description: OK
@@ -524,6 +539,7 @@ paths:
           $ref: '#/definitions/requests.CommentRequest'
       produces:
       - application/json
+      - text/xml
       responses:
         "200":
           description: OK
@@ -565,6 +581,7 @@ paths:
           $ref: '#/definitions/requests.UserRequest'
       produces:
       - application/json
+      - text/xml
       responses:
         "200":
           description: OK

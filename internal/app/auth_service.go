@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+//go:generate mockery --dir . --name AuthService --output ./mocks
 type AuthService interface {
 	Register(user domain.User) (domain.User, string, error)
 	Login(user domain.User) (domain.User, string, error)

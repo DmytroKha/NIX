@@ -25,56 +25,6 @@ import (
 // @in                         header
 // @name                       Authorization
 func main() {
-
-	//BEGINNER. 1.	Налаштувати середовище розробки.
-	//beginner.printHello()
-
-	//BEGINNER. 2.	Робота з репозиторієм.
-	//https://github.com/DmytroKha/NIX
-
-	//BEGINNER. 3.	Отримання інформації з мережі. Є сервіс https://jsonplaceholder.typicode.com/ .
-	//представляє REST API для отримання даних у форматі JSON. Сайт надає доступ до таких ресурсів:
-	//beginner.getNetInformation()
-
-	//BEGINNER. 4.	Горутини.
-	//beginner.useGoroutine()
-
-	//BEGINNER. 5.	Файлова система
-	//beginner.useFileSystem()
-
-	//BEGINNER. 6.	Робота с БД
-	//beginner.useDB()
-
-	//TRAINEE. 1.	Сodestyle
-	//golangci-lint run
-
-	//TRAINEE. 2.	Gitflow
-	//???
-
-	//TRAINEE. 3.	GORM
-	//trainee.useDBWithGORM()
-
-	//TRAINEE. 4.	Створення REST API
-	//trainee.createRESTAPI()
-
-	//TRAINEE. 5.	Echo framework
-	echoRESTAPI()
-
-	//TRAINEE. 6.	Swagger specification
-	//Додай swagger до API. Використовуй пакет - swag
-	//http://localhost:8080/swagger/index.html
-
-	//TRAINEE. 7. OAuth 2.0 	Додай можливість реєстрації, авторизації користувачів,
-	//використовуючи стандарт JWT; Додай авторизацію + реєстрацію через Google використовуючи протокол OAuth2.0.
-	//Тільки авторизовані користувачі можуть писати пости та залишати коментарі,
-	//кожний пост і комент прив'язаний до будь-якого користувача. Використовуй бібліотеку — golang/oauth2
-
-	//TRAINEE. 8. Тестування	Напиши тести для свого API. Використовуй стандартну бібліотеку для тестування - testing
-
-}
-
-func echoRESTAPI() {
-
 	var conf = config.GetConfiguration()
 
 	err := database.Migrate(conf)

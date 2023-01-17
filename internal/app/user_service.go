@@ -7,6 +7,7 @@ import (
 	"nix_education/internal/infra/database"
 )
 
+//go:generate mockery --dir . --name UserService --output ./mocks
 type UserService interface {
 	Save(user domain.User) (domain.User, error)
 	SetPassword(user domain.User) (domain.User, error)

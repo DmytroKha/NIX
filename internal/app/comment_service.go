@@ -7,6 +7,7 @@ import (
 	"nix_education/internal/infra/database"
 )
 
+//go:generate mockery --dir . --name CommentService --output ./mocks
 type CommentService interface {
 	Save(comment domain.Comment) (domain.Comment, error)
 	Update(comment domain.Comment) (domain.Comment, error)

@@ -27,6 +27,7 @@ func NewPostController(s app.PostService) PostController {
 // @Tags         posts
 // @Accept       json
 // @Produce      json
+// @Produce      xml
 // @Param        input   body      requests.PostRequest  true  "Post body"
 // @Success      201  {object}  resources.PostDto
 // @Failure      400  {string}  echo.HTTPError
@@ -74,6 +75,7 @@ func (c PostController) Save(ctx echo.Context) error {
 // @Tags         posts
 // @Accept       json
 // @Produce      json
+// @Produce      xml
 // @Param        id   path      string  true  "Post ID"
 // @Success      200  {object}  resources.PostDto
 // @Failure      400  {string}  echo.HTTPError
@@ -102,11 +104,13 @@ func (c PostController) Find(ctx echo.Context) error {
 // @Tags         posts
 // @Accept       json
 // @Produce      json
+// @Produce      xml
 // @Success      200  {object}  resources.PostDto
 // @Failure      400  {string}  echo.HTTPError
 // @Router       /posts [get]
 func (c PostController) FindAll(ctx echo.Context) error {
-	pagination, err := requests.DecodePaginationQuery(ctx.Request())
+	rqst := ctx.Request()
+	pagination, err := requests.DecodePaginationQuery(rqst)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
@@ -117,8 +121,14 @@ func (c PostController) FindAll(ctx echo.Context) error {
 	}
 
 	var postDto resources.PostDto
-
-	return ctx.JSON(http.StatusOK, postDto.DomainToDtoCollection(posts))
+	//hdr := ctx.Response().Header()
+	//ct := hdr.Get("Content-Type")
+	ct := rqst.Header.Get("Accept")
+	if ct == "text/xml" {
+		return ctx.XML(http.StatusOK, postDto.DomainToDtoCollection(posts))
+	} else {
+		return ctx.JSON(http.StatusOK, postDto.DomainToDtoCollection(posts))
+	}
 }
 
 // UpdatePost godoc
@@ -128,6 +138,7 @@ func (c PostController) FindAll(ctx echo.Context) error {
 // @Tags         posts
 // @Accept       json
 // @Produce      json
+// @Produce      xml
 // @Param        id   path      string  true  "Post ID"
 // @Param        input   body      requests.PostRequest  true  "Post body"
 // @Success      200  {object}  resources.PostDto
@@ -181,6 +192,7 @@ func (c PostController) Update(ctx echo.Context) error {
 // @Tags         posts
 // @Accept       json
 // @Produce      json
+// @Produce      xml
 // @Param        id   path      string  true  "Post ID"
 // @Success      200  {object}  domain.Post
 // @Failure      400  {string}  echo.HTTPError

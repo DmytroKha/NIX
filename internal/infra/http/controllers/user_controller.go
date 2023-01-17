@@ -25,6 +25,7 @@ func NewUserController(us app.UserService) UserController {
 // @Tags         users
 // @Accept       json
 // @Produce      json
+// @Produce      xml
 // @Param        id   path      string  true  "User ID"
 // @Param        input   body      requests.UserRequest  true  "User body"
 // @Success      200  {object}  resources.UserDto

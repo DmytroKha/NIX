@@ -55,6 +55,7 @@ func NewAuthController(as app.AuthService, us app.UserService) AuthController {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
+// @Produce      xml
 // @Param        input   body      requests.UserRequest  true  "User body"
 // @Success      201  {object}  resources.AuthDto
 // @Failure      400  {string}  echo.HTTPError
@@ -95,6 +96,7 @@ func (c AuthController) Register(ctx echo.Context) error {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
+// @Produce      xml
 // @Param        input   body      requests.UserRequest  true  "User body"
 // @Success      200  {object}  resources.AuthDto
 // @Failure      400  {string}  echo.HTTPError
@@ -134,6 +136,7 @@ func (c AuthController) Login(ctx echo.Context) error {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
+// @Produce      xml
 // @Success      201  {object}  resources.GoogleUrlDto
 // @Failure      400  {string}  echo.HTTPError
 // @Failure      422  {string}  echo.HTTPError
@@ -198,7 +201,9 @@ func getUserInfo(token *oauth2.Token) ([]byte, error) {
 		return nil, fmt.Errorf("failed getting user info: %s", err.Error())
 	}
 
-	defer response.Body.Close()
+	defer func() {
+		_ = response.Body.Close()
+	}()
 	contents, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed reading response body: %s", err.Error())
