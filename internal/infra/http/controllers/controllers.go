@@ -15,6 +15,12 @@ const (
 	UserEmailKey = "email"
 )
 
+type HTTPErrorXMLJSON struct {
+	Code     int         `xml:"-" json:"-"`
+	Message  interface{} `xml:"message" json:"message"`
+	Internal error       `xml:"-" json:"-"`
+}
+
 func GetUserValueFromJWT(ctx echo.Context, key string) string {
 	user := ctx.Get(UserKey)
 	token := user.(*jwt.Token)
@@ -23,4 +29,13 @@ func GetUserValueFromJWT(ctx echo.Context, key string) string {
 	val := claims[key].(string)
 
 	return val
+}
+
+func FormatedResponse(ctx echo.Context, code int, i interface{}) error {
+	ct := ctx.Request().Header.Get("Accept")
+	if ct == "text/xml" {
+		return ctx.XML(code, i)
+	} else {
+		return ctx.JSON(code, i)
+	}
 }

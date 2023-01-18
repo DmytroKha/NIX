@@ -11,7 +11,6 @@ func SetMainMiddlewares(e *echo.Echo) {
 func serverHeader(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		c.Response().Header().Set(echo.HeaderServer, "NIX/v1.0")
-		//c.Response().Header().Set(echo.HeaderContentType, "application/json")
 		return next(c)
 	}
 }

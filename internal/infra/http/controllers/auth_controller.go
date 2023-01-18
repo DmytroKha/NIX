@@ -66,27 +66,32 @@ func (c AuthController) Register(ctx echo.Context) error {
 	var usr requests.UserRequest
 	err := ctx.Bind(&usr)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		//return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
 
 	err = ctx.Validate(&usr)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+		//return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+		return FormatedResponse(ctx, http.StatusUnprocessableEntity, err)
 	}
 
 	u, err := usr.ToDomainModel()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		//return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
 
 	user, token, err := c.authService.Register(u)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		//return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
 
 	var authDto resources.AuthDto
 
-	return ctx.JSON(http.StatusCreated, authDto.DomainToDto(token, user))
+	//return ctx.JSON(http.StatusCreated, authDto.DomainToDto(token, user))
+	return FormatedResponse(ctx, http.StatusCreated, authDto.DomainToDto(token, user))
 
 }
 
@@ -107,27 +112,32 @@ func (c AuthController) Login(ctx echo.Context) error {
 	var usr requests.UserRequest
 	err := ctx.Bind(&usr)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		//return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
 
 	err = ctx.Validate(&usr)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+		//return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+		return FormatedResponse(ctx, http.StatusUnprocessableEntity, err)
 	}
 
 	u, err := usr.ToDomainModel()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		//return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
 
 	user, token, err := c.authService.Login(u)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		//return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
 
 	var authDto resources.AuthDto
 
-	return ctx.JSON(http.StatusOK, authDto.DomainToDto(token, user))
+	//return ctx.JSON(http.StatusOK, authDto.DomainToDto(token, user))
+	return FormatedResponse(ctx, http.StatusOK, authDto.DomainToDto(token, user))
 }
 
 // LogInUserWithGooglePartOne godoc
@@ -147,7 +157,8 @@ func (c AuthController) LoginGoogle(ctx echo.Context) error {
 	url := googleOauthConfig.AuthCodeURL(oauthStateString)
 	err := ctx.Redirect(http.StatusTemporaryRedirect, url)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		//return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
 
 	return nil
@@ -156,13 +167,15 @@ func (c AuthController) LoginGoogle(ctx echo.Context) error {
 func (c AuthController) Callback(ctx echo.Context) error {
 
 	if ctx.FormValue("state") != oauthStateString {
-		return fmt.Errorf("invalid oauth state")
+		//return fmt.Errorf("invalid oauth state")
+		return FormatedResponse(ctx, http.StatusBadRequest, fmt.Errorf("invalid oauth state"))
 	}
 
 	token, err := googleOauthConfig.Exchange(context.Background(), ctx.FormValue("code"))
 	if err != nil {
 		//return fmt.Errorf("code exchange failed: %s", err.Error())
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		//return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
 
 	var authDto resources.AuthDto
@@ -172,26 +185,31 @@ func (c AuthController) Callback(ctx echo.Context) error {
 		//fmt.Println(err.Error())
 		//ctx.Redirect(http.StatusTemporaryRedirect, "/")
 		//return err
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+		//return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+		return FormatedResponse(ctx, http.StatusUnprocessableEntity, err)
 	}
 
 	var cnt content
 	err = json.Unmarshal(cont, &cnt)
 
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		//return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
 
 	if !cnt.Verified {
-		return echo.NewHTTPError(http.StatusUnauthorized, fmt.Errorf("email is not verified"))
+		//return echo.NewHTTPError(http.StatusUnauthorized, fmt.Errorf("email is not verified"))
+		return FormatedResponse(ctx, http.StatusUnauthorized, fmt.Errorf("email is not verified"))
 	}
 
 	user, jwtToken, err := c.authService.LoginGoogle(cnt.Email)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		//return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
 
-	return ctx.JSON(http.StatusCreated, authDto.DomainToDto(jwtToken, user))
+	//return ctx.JSON(http.StatusCreated, authDto.DomainToDto(jwtToken, user))
+	return FormatedResponse(ctx, http.StatusCreated, authDto.DomainToDto(jwtToken, user))
 
 }
 
