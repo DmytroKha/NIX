@@ -2,7 +2,7 @@ package resources
 
 import (
 	jwt "github.com/dgrijalva/jwt-go"
-	"nix_education/internal/domain"
+	"nix_education/internal/infra/database"
 )
 
 type UserDto struct {
@@ -31,7 +31,7 @@ type GoogleUrlDto struct {
 	Url string `json:"url"`
 }
 
-func (d UserDto) DomainToDto(user domain.User) UserDto {
+func (d UserDto) DatabaseToDto(user database.User) UserDto {
 	return UserDto{
 		Id:    user.Id,
 		Email: user.Email,
@@ -39,28 +39,25 @@ func (d UserDto) DomainToDto(user domain.User) UserDto {
 	}
 }
 
-func (d AuthDto) DomainToDto(token string, user domain.User) AuthDto {
+func (d AuthDto) DatabaseToDto(token string, user database.User) AuthDto {
 	var userDto UserDto
-
 	a := AuthDto{
 		Token: token,
-		User:  userDto.DomainToDto(user),
+		User:  userDto.DatabaseToDto(user),
 	}
 	return a
 }
 
-func (d GoogleUrlDto) DomainToDto(url string) GoogleUrlDto {
+func (d GoogleUrlDto) DatabaseToDto(url string) GoogleUrlDto {
 	return GoogleUrlDto{
 		Url: url,
 	}
 }
 
-func (d UserDto) DomainToDtoCollection(users domain.Users) UsersDto {
+func (d UserDto) DatabaseToDtoCollection(users database.Users) UsersDto {
 	result := make([]UserDto, len(users.Items))
-
 	for i := range users.Items {
-		result[i] = d.DomainToDto(users.Items[i])
+		result[i] = d.DatabaseToDto(users.Items[i])
 	}
-
 	return UsersDto{Items: result, Pages: users.Pages, Total: users.Total}
 }

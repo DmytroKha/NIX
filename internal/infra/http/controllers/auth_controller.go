@@ -66,32 +66,22 @@ func (c AuthController) Register(ctx echo.Context) error {
 	var usr requests.UserRequest
 	err := ctx.Bind(&usr)
 	if err != nil {
-		//return echo.NewHTTPError(http.StatusBadRequest, err)
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	err = ctx.Validate(&usr)
 	if err != nil {
-		//return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
 		return FormatedResponse(ctx, http.StatusUnprocessableEntity, err)
 	}
-
-	u, err := usr.ToDomainModel()
+	u, err := usr.ToDatabaseModel()
 	if err != nil {
-		//return echo.NewHTTPError(http.StatusBadRequest, err)
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	user, token, err := c.authService.Register(u)
 	if err != nil {
-		//return echo.NewHTTPError(http.StatusBadRequest, err)
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	var authDto resources.AuthDto
-
-	//return ctx.JSON(http.StatusCreated, authDto.DomainToDto(token, user))
-	return FormatedResponse(ctx, http.StatusCreated, authDto.DomainToDto(token, user))
+	return FormatedResponse(ctx, http.StatusCreated, authDto.DatabaseToDto(token, user))
 
 }
 
@@ -112,32 +102,22 @@ func (c AuthController) Login(ctx echo.Context) error {
 	var usr requests.UserRequest
 	err := ctx.Bind(&usr)
 	if err != nil {
-		//return echo.NewHTTPError(http.StatusBadRequest, err)
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	err = ctx.Validate(&usr)
 	if err != nil {
-		//return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
 		return FormatedResponse(ctx, http.StatusUnprocessableEntity, err)
 	}
-
-	u, err := usr.ToDomainModel()
+	u, err := usr.ToDatabaseModel()
 	if err != nil {
-		//return echo.NewHTTPError(http.StatusBadRequest, err)
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	user, token, err := c.authService.Login(u)
 	if err != nil {
-		//return echo.NewHTTPError(http.StatusBadRequest, err)
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	var authDto resources.AuthDto
-
-	//return ctx.JSON(http.StatusOK, authDto.DomainToDto(token, user))
-	return FormatedResponse(ctx, http.StatusOK, authDto.DomainToDto(token, user))
+	return FormatedResponse(ctx, http.StatusOK, authDto.DatabaseToDto(token, user))
 }
 
 // LogInUserWithGooglePartOne godoc
@@ -153,63 +133,41 @@ func (c AuthController) Login(ctx echo.Context) error {
 // @Failure      500  {string}  echo.HTTPError
 // @Router       /auth/loginGoogle [post]
 func (c AuthController) LoginGoogle(ctx echo.Context) error {
-
 	url := googleOauthConfig.AuthCodeURL(oauthStateString)
 	err := ctx.Redirect(http.StatusTemporaryRedirect, url)
 	if err != nil {
 		//return echo.NewHTTPError(http.StatusBadRequest, err)
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	return nil
 }
 
 func (c AuthController) Callback(ctx echo.Context) error {
-
 	if ctx.FormValue("state") != oauthStateString {
-		//return fmt.Errorf("invalid oauth state")
 		return FormatedResponse(ctx, http.StatusBadRequest, fmt.Errorf("invalid oauth state"))
 	}
-
 	token, err := googleOauthConfig.Exchange(context.Background(), ctx.FormValue("code"))
 	if err != nil {
-		//return fmt.Errorf("code exchange failed: %s", err.Error())
-		//return echo.NewHTTPError(http.StatusBadRequest, err)
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	var authDto resources.AuthDto
-
 	cont, err := getUserInfo(token)
 	if err != nil {
-		//fmt.Println(err.Error())
-		//ctx.Redirect(http.StatusTemporaryRedirect, "/")
-		//return err
-		//return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
 		return FormatedResponse(ctx, http.StatusUnprocessableEntity, err)
 	}
-
 	var cnt content
 	err = json.Unmarshal(cont, &cnt)
-
 	if err != nil {
-		//return echo.NewHTTPError(http.StatusBadRequest, err)
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	if !cnt.Verified {
-		//return echo.NewHTTPError(http.StatusUnauthorized, fmt.Errorf("email is not verified"))
 		return FormatedResponse(ctx, http.StatusUnauthorized, fmt.Errorf("email is not verified"))
 	}
-
 	user, jwtToken, err := c.authService.LoginGoogle(cnt.Email)
 	if err != nil {
-		//return echo.NewHTTPError(http.StatusBadRequest, err)
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
-	//return ctx.JSON(http.StatusCreated, authDto.DomainToDto(jwtToken, user))
-	return FormatedResponse(ctx, http.StatusCreated, authDto.DomainToDto(jwtToken, user))
+	return FormatedResponse(ctx, http.StatusCreated, authDto.DatabaseToDto(jwtToken, user))
 
 }
 
@@ -218,7 +176,6 @@ func getUserInfo(token *oauth2.Token) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed getting user info: %s", err.Error())
 	}
-
 	defer func() {
 		_ = response.Body.Close()
 	}()
@@ -226,6 +183,5 @@ func getUserInfo(token *oauth2.Token) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed reading response body: %s", err.Error())
 	}
-
 	return contents, nil
 }

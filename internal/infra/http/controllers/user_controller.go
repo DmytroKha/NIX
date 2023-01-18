@@ -37,30 +37,20 @@ func (c UserController) SetPassword(ctx echo.Context) error {
 	var user requests.UserRequest
 	err := ctx.Bind(&user)
 	if err != nil {
-		//return echo.NewHTTPError(http.StatusBadRequest, err)
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	err = ctx.Validate(&user)
 	if err != nil {
-		//return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
 		return FormatedResponse(ctx, http.StatusUnprocessableEntity, err)
 	}
-
-	u, err := user.ToDomainModel()
+	u, err := user.ToDatabaseModel()
 	if err != nil {
-		//return echo.NewHTTPError(http.StatusBadRequest, err)
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	updatedUser, err := c.userService.SetPassword(u)
 	if err != nil {
-		//return echo.NewHTTPError(http.StatusInternalServerError, err)
 		return FormatedResponse(ctx, http.StatusInternalServerError, err)
 	}
-
 	var userDto resources.UserDto
-
-	//return ctx.JSON(http.StatusOK, userDto.DomainToDto(updatedUser))
-	return FormatedResponse(ctx, http.StatusOK, userDto.DomainToDto(updatedUser))
+	return FormatedResponse(ctx, http.StatusOK, userDto.DatabaseToDto(updatedUser))
 }

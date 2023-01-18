@@ -8,7 +8,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"log"
 	"net/http"
-	"nix_education/internal/domain"
+	"nix_education/internal/infra/database"
 )
 
 var commentControllerTests = []*requestTest{
@@ -214,16 +214,13 @@ var commentControllerTests = []*requestTest{
 
 func commentModelMocker(n, id int, email string) {
 	for i := 1; i <= n; i++ {
-
 		postID := int64(id)
-
-		cModel := domain.Comment{
+		cModel := database.Comment{
 			PostId: postID,
 			Email:  email,
 			Name:   fmt.Sprintf("Comment%d to post%d", i, postID),
 			Body:   fmt.Sprintf("Some test comment%d", i),
 		}
-
 		_, err := commentService.Save(cModel)
 		if err != nil {
 			log.Fatalf("commentModelMocker() failed: %s", err)

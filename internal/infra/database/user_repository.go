@@ -2,23 +2,28 @@ package database
 
 import (
 	"gorm.io/gorm"
-	"nix_education/internal/domain"
 )
 
 const UserTableName = "users"
 
-type user struct {
+type User struct {
 	Id       int64 `gorm:"primary_key;auto_increment;not_null"`
 	Name     string
 	Email    string
 	Password string
 }
 
+type Users struct {
+	Items []User
+	Total uint64
+	Pages uint64
+}
+
 //go:generate mockery --dir . --name UserRepository --output ./mocks
 type UserRepository interface {
-	Save(user domain.User) (domain.User, error)
-	Update(user domain.User) (domain.User, error)
-	FindByEmail(email string) (domain.User, error)
+	Save(user User) (User, error)
+	Update(user User) (User, error)
+	FindByEmail(email string) (User, error)
 }
 
 type userRepository struct {
@@ -31,55 +36,27 @@ func NewUserRepository(dbSession *gorm.DB) UserRepository {
 	}
 }
 
-func (r userRepository) Save(u domain.User) (domain.User, error) {
-	var usr user
-
-	usr.FromDomainModel(u)
-
-	err := r.sess.Table(UserTableName).Create(&usr).Error
+func (r userRepository) Save(u User) (User, error) {
+	err := r.sess.Table(UserTableName).Create(&u).Error
 	if err != nil {
-		return domain.User{}, err
+		return User{}, err
 	}
-
-	return usr.ToDomainModel(), nil
+	return u, nil
 }
 
-func (r userRepository) Update(u domain.User) (domain.User, error) {
-	var usr user
-
-	usr.FromDomainModel(u)
-
-	err := r.sess.Save(&usr).Error
+func (r userRepository) Update(u User) (User, error) {
+	err := r.sess.Save(&u).Error
 	if err != nil {
-		return domain.User{}, err
+		return User{}, err
 	}
-
-	return usr.ToDomainModel(), nil
+	return u, nil
 }
 
-func (r *userRepository) FindByEmail(email string) (domain.User, error) {
-	var usr user
-
-	err := r.sess.Table(UserTableName).First(&usr, "email = ?", email).Error
+func (r *userRepository) FindByEmail(email string) (User, error) {
+	var u User
+	err := r.sess.Table(UserTableName).First(&u, "email = ?", email).Error
 	if err != nil {
-		return domain.User{}, err
+		return User{}, err
 	}
-
-	return usr.ToDomainModel(), nil
-}
-
-func (u user) ToDomainModel() domain.User {
-	return domain.User{
-		Id:       u.Id,
-		Name:     u.Name,
-		Email:    u.Email,
-		Password: u.Password,
-	}
-}
-
-func (u *user) FromDomainModel(du domain.User) {
-	u.Id = du.Id
-	u.Name = du.Name
-	u.Email = du.Email
-	u.Password = du.Password
+	return u, nil
 }
