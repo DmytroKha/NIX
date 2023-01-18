@@ -169,7 +169,7 @@ func (c PostController) Update(ctx echo.Context) error {
 // @Produce      json
 // @Produce      xml
 // @Param        id   path      string  true  "Post ID"
-// @Success      200  {object}  domain.Post
+// @Success      200  {object}  resources.PostDto
 // @Failure      400  {string}  echo.HTTPError
 // @Failure      404  {string}  echo.HTTPError
 // @Router       /posts/{id} [delete]

@@ -187,7 +187,7 @@ func (c CommentController) Update(ctx echo.Context) error {
 // @Produce      xml
 // @Param        postId   path      string  true  "Post ID"
 // @Param        id   path      string  true  "Comment ID"
-// @Success      200  {object}  domain.OK
+// @Success      200  {object}  resources.CommentDto
 // @Failure      400  {string}  echo.HTTPError
 // @Failure      404  {string}  echo.HTTPError
 // @Router       /posts/{postId}/comments/{id} [delete]
