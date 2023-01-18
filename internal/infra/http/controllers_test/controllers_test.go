@@ -15,7 +15,6 @@ import (
 	"net/http/httptest"
 	"nix_education/config"
 	"nix_education/internal/app"
-	"nix_education/internal/domain"
 	"nix_education/internal/infra/database"
 	"nix_education/internal/infra/http/controllers"
 	"nix_education/internal/infra/http/router"
@@ -48,7 +47,7 @@ func TestMain(m *testing.M) {
 func TestControllers(t *testing.T) {
 
 	var conf = config.Configuration{
-		DatabaseName:        "nix_education",
+		DatabaseName:        "nix_education_test",
 		DatabaseHost:        "127.0.0.1:3306",
 		DatabaseUser:        "root",
 		DatabasePassword:    "root",
@@ -58,7 +57,6 @@ func TestControllers(t *testing.T) {
 		JwtSecret:           "1234567890",
 		JwtTTL:              24 * time.Hour,
 	}
-
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s",
 		conf.DatabaseUser,
 		conf.DatabasePassword,
@@ -68,7 +66,6 @@ func TestControllers(t *testing.T) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 	connString := fmt.Sprintf(
 		"mysql://%s:%s@tcp(%s)/%s",
 		conf.DatabaseUser,
@@ -76,29 +73,23 @@ func TestControllers(t *testing.T) {
 		conf.DatabaseHost,
 		conf.DatabaseName,
 	)
-
 	migrator, err := migrate.New(
 		"file://"+conf.MigrationLocation,
 		connString)
 	if err != nil {
 		log.Fatalf("Unable to create Migrator: %q\n", err)
 	}
-
 	userRepository := database.NewUserRepository(db)
 	userService = app.NewUserService(userRepository)
 	userController := controllers.NewUserController(userService)
-
 	authService = app.NewAuthService(userService, conf)
 	authController := controllers.NewAuthController(authService, userService)
-
 	postRepository := database.NewPostRepository(db)
 	postService = app.NewPostService(postRepository)
 	postController := controllers.NewPostController(postService)
-
 	commentRepository := database.NewCommentRepository(db)
 	commentService = app.NewCommentService(commentRepository, postService)
 	commentController := controllers.NewCommentController(commentService)
-
 	// Create routes
 	e := router.New(
 		userController,
@@ -106,12 +97,10 @@ func TestControllers(t *testing.T) {
 		postController,
 		commentController,
 		conf)
-
 	iterateOverTests(t, "AuthController", authControllerTests, e, migrator)
 	iterateOverTests(t, "UserController", userControllerTests, e, migrator)
 	iterateOverTests(t, "PostController", postControllerTests, e, migrator)
 	iterateOverTests(t, "CommentController", commentControllerTests, e, migrator)
-
 }
 
 func iterateOverTests(t *testing.T, name string, tests []*requestTest, router http.Handler, migrator *migrate.Migrate) {
@@ -122,13 +111,10 @@ func iterateOverTests(t *testing.T, name string, tests []*requestTest, router ht
 			req, err := http.NewRequest(tt.method, tt.url, bytes.NewBufferString(bodyData))
 			require.NoError(t, err)
 			req.Header.Set("Content-Type", "application/json")
-
 			tt.init(req, migrator)
-
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, req)
 			body := w.Body.String()
-
 			fmt.Printf("[%d]\n", w.Code)
 			require.Equal(t, tt.expectedCode, w.Code, "Response Status - "+tt.msg+"\nBody:\n"+body)
 			require.Regexp(t, tt.responseRegex, body, "Response Content - "+tt.msg)
@@ -137,7 +123,7 @@ func iterateOverTests(t *testing.T, name string, tests []*requestTest, router ht
 }
 
 func HeaderTokenMock(req *http.Request, uId int64, email string) {
-	tokenString, _ := authService.GenerateJwt(domain.User{Id: uId, Email: email})
+	tokenString, _ := authService.GenerateJwt(database.User{Id: uId, Email: email})
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", tokenString))
 }
 

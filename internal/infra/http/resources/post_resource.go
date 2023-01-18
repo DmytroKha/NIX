@@ -1,7 +1,7 @@
 package resources
 
 import (
-	"nix_education/internal/domain"
+	"nix_education/internal/infra/database"
 )
 
 type PostDto struct {
@@ -17,7 +17,7 @@ type PostsDto struct {
 	Pages uint64    `json:"pages"`
 }
 
-func (d PostDto) DomainToDto(post domain.Post) PostDto {
+func (d PostDto) DatabaseToDto(post database.Post) PostDto {
 	return PostDto{
 		Id:     post.Id,
 		UserId: post.UserId,
@@ -26,12 +26,10 @@ func (d PostDto) DomainToDto(post domain.Post) PostDto {
 	}
 }
 
-func (d PostDto) DomainToDtoCollection(posts domain.Posts) PostsDto {
+func (d PostDto) DatabaseToDtoCollection(posts database.Posts) PostsDto {
 	result := make([]PostDto, len(posts.Items))
-
 	for i := range posts.Items {
-		result[i] = d.DomainToDto(posts.Items[i])
+		result[i] = d.DatabaseToDto(posts.Items[i])
 	}
-
 	return PostsDto{Items: result, Pages: posts.Pages, Total: posts.Total}
 }

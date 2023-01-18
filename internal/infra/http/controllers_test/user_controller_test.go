@@ -8,7 +8,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"log"
 	"net/http"
-	"nix_education/internal/domain"
+	"nix_education/internal/infra/database"
 )
 
 var userControllerTests = []*requestTest{
@@ -27,15 +27,14 @@ var userControllerTests = []*requestTest{
 	},
 }
 
-func userModelMocker(n int, p string) []domain.User {
-	users := make([]domain.User, 0, n)
+func userModelMocker(n int, p string) []database.User {
+	users := make([]database.User, 0, n)
 	for i := 1; i <= n; i++ {
-		uModel := domain.User{
+		uModel := database.User{
 			Email:    fmt.Sprintf("email%d@example.com", i),
 			Password: p,
 			Name:     fmt.Sprintf("User Name %d", i),
 		}
-
 		user, err := userService.Save(uModel)
 		if err != nil {
 			log.Fatalf("userModelMocker() failed: %s", err)

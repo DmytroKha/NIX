@@ -17,9 +17,7 @@ func Migrate(conf config.Configuration) error {
 	if conf.MigrateToVersion == "" {
 		return nil
 	}
-
 	migrationsPath := conf.MigrationLocation
-
 	_, err := os.Stat(migrationsPath)
 	if err != nil {
 		log.Printf("Migrate: failed to open '%s' folder, trying to create...\n", migrationsPath)
@@ -28,7 +26,6 @@ func Migrate(conf config.Configuration) error {
 			return err
 		}
 	}
-
 	urlString := fmt.Sprintf(
 		"mysql://%s:%s@tcp(%s)/%s",
 		conf.DatabaseUser,
@@ -36,14 +33,12 @@ func Migrate(conf config.Configuration) error {
 		conf.DatabaseHost,
 		conf.DatabaseName,
 	)
-
 	m, err := migrate.New(
 		"file://"+migrationsPath,
 		urlString)
 	if err != nil {
 		return err
 	}
-
 	dbVersion, err := strconv.Atoi(conf.MigrateToVersion)
 	if err == nil {
 		log.Printf("Migrate: starting migration to version %v\n", dbVersion)

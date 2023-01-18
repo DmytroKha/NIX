@@ -1,7 +1,7 @@
 package requests
 
 import (
-	"nix_education/internal/domain"
+	"nix_education/internal/infra/database"
 )
 
 type UserRequest struct {
@@ -10,8 +10,8 @@ type UserRequest struct {
 	Name     string `json:"name"`
 }
 
-func (r UserRequest) ToDomainModel() (domain.User, error) {
-	return domain.User{
+func (r UserRequest) ToDatabaseModel() (database.User, error) {
+	return database.User{
 		Email:    r.Email,
 		Password: r.Password,
 		Name:     r.Name,

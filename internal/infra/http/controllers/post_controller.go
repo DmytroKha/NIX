@@ -38,34 +38,28 @@ func (c PostController) Save(ctx echo.Context) error {
 	var post requests.PostRequest
 	err := ctx.Bind(&post)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	err = ctx.Validate(&post)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+		return FormatedResponse(ctx, http.StatusUnprocessableEntity, err)
 	}
-
 	p, err := post.ToDomainModel()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	jtl := GetUserValueFromJWT(ctx, UserIdKey)
 	userId, err := strconv.Atoi(jtl)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
 	p.UserId = int64(userId)
-
 	createdPost, err := c.postService.Save(p)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return FormatedResponse(ctx, http.StatusInternalServerError, err)
 	}
-
 	var postDto resources.PostDto
-
-	return ctx.JSON(http.StatusCreated, postDto.DomainToDto(createdPost))
+	return FormatedResponse(ctx, http.StatusCreated, postDto.DatabaseToDto(createdPost))
 }
 
 // FindPost godoc
@@ -84,17 +78,14 @@ func (c PostController) Save(ctx echo.Context) error {
 func (c PostController) Find(ctx echo.Context) error {
 	postId, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	post, err := c.postService.Find(postId)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err)
+		return FormatedResponse(ctx, http.StatusNotFound, err)
 	}
-
 	var postDto resources.PostDto
-
-	return ctx.JSON(http.StatusOK, postDto.DomainToDto(post))
+	return FormatedResponse(ctx, http.StatusOK, postDto.DatabaseToDto(post))
 }
 
 // ListPosts godoc
@@ -109,26 +100,16 @@ func (c PostController) Find(ctx echo.Context) error {
 // @Failure      400  {string}  echo.HTTPError
 // @Router       /posts [get]
 func (c PostController) FindAll(ctx echo.Context) error {
-	rqst := ctx.Request()
-	pagination, err := requests.DecodePaginationQuery(rqst)
+	pagination, err := requests.DecodePaginationQuery(ctx.Request())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	posts, err := c.postService.FindAll(pagination)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err)
+		return FormatedResponse(ctx, http.StatusNotFound, err)
 	}
-
 	var postDto resources.PostDto
-	//hdr := ctx.Response().Header()
-	//ct := hdr.Get("Content-Type")
-	ct := rqst.Header.Get("Accept")
-	if ct == "text/xml" {
-		return ctx.XML(http.StatusOK, postDto.DomainToDtoCollection(posts))
-	} else {
-		return ctx.JSON(http.StatusOK, postDto.DomainToDtoCollection(posts))
-	}
+	return FormatedResponse(ctx, http.StatusOK, postDto.DatabaseToDtoCollection(posts))
 }
 
 // UpdatePost godoc
@@ -150,39 +131,33 @@ func (c PostController) Update(ctx echo.Context) error {
 	var post requests.PostRequest
 	err := ctx.Bind(&post)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
 	postId, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	err = ctx.Validate(&post)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+		return FormatedResponse(ctx, http.StatusUnprocessableEntity, err)
 	}
-
 	p, err := post.ToDomainModel()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	jtl := GetUserValueFromJWT(ctx, UserIdKey)
 	userId, err := strconv.Atoi(jtl)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
 	p.UserId = int64(userId)
 	p.Id = postId
-
 	updatedPost, err := c.postService.Update(p)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return FormatedResponse(ctx, http.StatusInternalServerError, err)
 	}
-
 	var postDto resources.PostDto
-
-	return ctx.JSON(http.StatusOK, postDto.DomainToDto(updatedPost))
+	return FormatedResponse(ctx, http.StatusOK, postDto.DatabaseToDto(updatedPost))
 }
 
 // DeletePost godoc
@@ -194,26 +169,23 @@ func (c PostController) Update(ctx echo.Context) error {
 // @Produce      json
 // @Produce      xml
 // @Param        id   path      string  true  "Post ID"
-// @Success      200  {object}  domain.Post
+// @Success      200  {object}  resources.PostDto
 // @Failure      400  {string}  echo.HTTPError
 // @Failure      404  {string}  echo.HTTPError
 // @Router       /posts/{id} [delete]
 func (c PostController) Delete(ctx echo.Context) error {
 	postId, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	jtl := GetUserValueFromJWT(ctx, UserIdKey)
 	userId, err := strconv.Atoi(jtl)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	err = c.postService.Delete(postId, int64(userId))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err)
+		return FormatedResponse(ctx, http.StatusNotFound, err)
 	}
-
-	return ctx.JSON(http.StatusOK, domain.OK)
+	return FormatedResponse(ctx, http.StatusOK, domain.OK)
 }

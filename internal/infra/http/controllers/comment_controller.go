@@ -39,37 +39,29 @@ func (c CommentController) Save(ctx echo.Context) error {
 	var comment requests.CommentRequest
 	postId, err := strconv.ParseInt(ctx.Param("postId"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	err = ctx.Bind(&comment)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	err = ctx.Validate(&comment)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+		return FormatedResponse(ctx, http.StatusUnprocessableEntity, err)
 	}
-
 	p, err := comment.ToDomainModel()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	p.PostId = postId
-
 	email := GetUserValueFromJWT(ctx, UserEmailKey)
 	p.Email = email
-
 	createdComment, err := c.commentService.Save(p)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return FormatedResponse(ctx, http.StatusInternalServerError, err)
 	}
-
 	var commentDto resources.CommentDto
-
-	return ctx.JSON(http.StatusCreated, commentDto.DomainToDto(createdComment))
+	return FormatedResponse(ctx, http.StatusCreated, commentDto.DatabaseToDto(createdComment))
 }
 
 // FindComment godoc
@@ -89,22 +81,18 @@ func (c CommentController) Save(ctx echo.Context) error {
 func (c CommentController) Find(ctx echo.Context) error {
 	postId, err := strconv.ParseInt(ctx.Param("postId"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	commentId, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	comment, err := c.commentService.Find(postId, commentId)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err)
+		return FormatedResponse(ctx, http.StatusNotFound, err)
 	}
-
 	var commentDto resources.CommentDto
-
-	return ctx.JSON(http.StatusOK, commentDto.DomainToDto(comment))
+	return FormatedResponse(ctx, http.StatusOK, commentDto.DatabaseToDto(comment))
 }
 
 // ListComments godoc
@@ -122,22 +110,18 @@ func (c CommentController) Find(ctx echo.Context) error {
 func (c CommentController) FindAll(ctx echo.Context) error {
 	postId, err := strconv.ParseInt(ctx.Param("postId"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	pagination, err := requests.DecodePaginationQuery(ctx.Request())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	comments, err := c.commentService.FindAll(postId, pagination)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err)
+		return FormatedResponse(ctx, http.StatusNotFound, err)
 	}
-
 	var commentDto resources.CommentDto
-
-	return ctx.JSON(http.StatusOK, commentDto.DomainToDtoCollection(comments))
+	return FormatedResponse(ctx, http.StatusOK, commentDto.DatabaseToDtoCollection(comments))
 }
 
 // UpdateComment godoc
@@ -158,50 +142,39 @@ func (c CommentController) FindAll(ctx echo.Context) error {
 // @Router       /posts/{postId}/comments/{id} [put]
 func (c CommentController) Update(ctx echo.Context) error {
 	var comment requests.CommentRequest
-
 	postId, err := strconv.ParseInt(ctx.Param("postId"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	err = ctx.Bind(&comment)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	err = ctx.Validate(&comment)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+		return FormatedResponse(ctx, http.StatusUnprocessableEntity, err)
 	}
-
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	p, err := comment.ToDomainModel()
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	email := GetUserValueFromJWT(ctx, UserEmailKey)
-
 	p.PostId = postId
 	p.Id = id
 	p.Email = email
-
 	updatedComment, err := c.commentService.Update(p)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return FormatedResponse(ctx, http.StatusInternalServerError, err)
 	}
-
 	var commentDto resources.CommentDto
-
-	return ctx.JSON(http.StatusOK, commentDto.DomainToDto(updatedComment))
+	return FormatedResponse(ctx, http.StatusOK, commentDto.DatabaseToDto(updatedComment))
 }
 
 // DeleteComment godoc
@@ -214,27 +187,23 @@ func (c CommentController) Update(ctx echo.Context) error {
 // @Produce      xml
 // @Param        postId   path      string  true  "Post ID"
 // @Param        id   path      string  true  "Comment ID"
-// @Success      200  {object}  domain.Comment
+// @Success      200  {object}  resources.CommentDto
 // @Failure      400  {string}  echo.HTTPError
 // @Failure      404  {string}  echo.HTTPError
 // @Router       /posts/{postId}/comments/{id} [delete]
 func (c CommentController) Delete(ctx echo.Context) error {
 	postId, err := strconv.ParseInt(ctx.Param("postId"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	commentId, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-
 	email := GetUserValueFromJWT(ctx, UserEmailKey)
-
 	err = c.commentService.Delete(postId, commentId, email)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusNotFound, err)
+		return FormatedResponse(ctx, http.StatusNotFound, err)
 	}
-
-	return ctx.JSON(http.StatusOK, domain.OK)
+	return FormatedResponse(ctx, http.StatusOK, domain.OK)
 }

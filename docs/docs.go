@@ -398,7 +398,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Post"
+                            "$ref": "#/definitions/resources.PostDto"
                         }
                     },
                     "400": {
@@ -687,7 +687,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/resources.CommentDto"
                         }
                     },
                     "400": {
@@ -772,43 +772,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "domain.Comment": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "postId": {
-                    "type": "integer"
-                }
-            }
-        },
-        "domain.Post": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "userId": {
-                    "type": "integer"
-                }
-            }
-        },
         "requests.CommentRequest": {
             "type": "object",
             "required": [
@@ -817,11 +780,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "body": {
-                    "description": "Email string ` + "`" + `json:\"email\"` + "`" + `",
                     "type": "string"
                 },
                 "name": {
-                    "description": "PostId int64  ` + "`" + `json:\"postId,omitempty\"` + "`" + `\nId     int64  ` + "`" + `json:\"id,omitempty\"` + "`" + `",
                     "type": "string"
                 }
             }
@@ -837,7 +798,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
-                    "description": "UserId int64 ` + "`" + `json:\"userId,omitempty\"` + "`" + `\nId     int64  ` + "`" + `json:\"id,omitempty\"` + "`" + `",
                     "type": "string"
                 }
             }

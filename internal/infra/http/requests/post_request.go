@@ -1,23 +1,17 @@
 package requests
 
 import (
-	"nix_education/internal/domain"
+	"nix_education/internal/infra/database"
 )
 
 type PostRequest struct {
-	//UserId int64 `json:"userId,omitempty"`
-	//Id     int64  `json:"id,omitempty"`
 	Title string `json:"title" validate:"required"`
 	Body  string `json:"body" validate:"required"`
 }
 
-func (r PostRequest) ToDomainModel() (domain.Post, error) {
-
-	var pst domain.Post
-	//pst.Id = r.Id
-	//pst.UserId = r.UserId
+func (r PostRequest) ToDomainModel() (database.Post, error) {
+	var pst database.Post
 	pst.Title = r.Title
 	pst.Body = r.Body
-
 	return pst, nil
 }

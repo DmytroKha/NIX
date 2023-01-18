@@ -8,19 +8,25 @@ import (
 
 const PostTableName = "posts"
 
-type post struct {
+type Post struct {
 	Id     int64 `gorm:"primary_key;auto_increment;not_null"`
 	UserId int64
 	Title  string
 	Body   string
 }
 
+type Posts struct {
+	Items []Post
+	Total uint64
+	Pages uint64
+}
+
 //go:generate mockery --dir . --name PostRepository --output ./mocks
 type PostRepository interface {
-	Save(post domain.Post) (domain.Post, error)
-	Find(id int64) (domain.Post, error)
-	FindAll(p domain.Pagination) (domain.Posts, error)
-	Update(post domain.Post) (domain.Post, error)
+	Save(post Post) (Post, error)
+	Find(id int64) (Post, error)
+	FindAll(p domain.Pagination) (Posts, error)
+	Update(post Post) (Post, error)
 	Delete(id int64) error
 }
 
@@ -34,107 +40,61 @@ func NewPostRepository(dbSession *gorm.DB) PostRepository {
 	}
 }
 
-func (r postRepository) Save(p domain.Post) (domain.Post, error) {
-	var pst post
-
-	pst.FromDomainModel(p)
-
-	err := r.sess.Table(PostTableName).Create(&pst).Error
+func (r postRepository) Save(p Post) (Post, error) {
+	err := r.sess.Table(PostTableName).Create(&p).Error
 	if err != nil {
-		return domain.Post{}, err
+		return Post{}, err
 	}
-
-	return pst.ToDomainModel(), nil
+	return p, nil
 }
 
-func (r postRepository) Find(id int64) (domain.Post, error) {
-	var pst post
-
-	err := r.sess.Table(PostTableName).First(&pst, "id = ?", id).Error
+func (r postRepository) Find(id int64) (Post, error) {
+	var p Post
+	err := r.sess.Table(PostTableName).First(&p, "id = ?", id).Error
 	if err != nil {
-		return domain.Post{}, err
+		return Post{}, err
 	}
-
-	return pst.ToDomainModel(), nil
+	return p, nil
 }
 
-func (r postRepository) FindAll(p domain.Pagination) (domain.Posts, error) {
-	var posts []post
+func (r postRepository) FindAll(p domain.Pagination) (Posts, error) {
+	var posts []Post
 	offset := (p.Page - 1) * p.CountPerPage
 	queryBuider := r.sess.Table(PostTableName).Limit(int(p.CountPerPage)).Offset(int(offset))
 	err := queryBuider.Find(&posts).Error
 	if err != nil {
-		return domain.Posts{}, err
+		return Posts{}, err
 	}
-
-	dposts := mapToPostDomainCollection(posts)
-
+	pCol := mapToPostCollection(posts)
 	result := r.sess.Table(PostTableName).Find(&posts)
 	if result.Error != nil {
-		return domain.Posts{}, result.Error
+		return Posts{}, result.Error
 	}
-
 	total := result.RowsAffected
-
-	dposts.Total = uint64(total)
-	dposts.Pages = uint64(math.Ceil(float64(total) / float64(p.CountPerPage)))
-
-	return dposts, nil
+	pCol.Total = uint64(total)
+	pCol.Pages = uint64(math.Ceil(float64(total) / float64(p.CountPerPage)))
+	return pCol, nil
 }
 
-func (r postRepository) Update(p domain.Post) (domain.Post, error) {
-	var pst post
-
-	pst.FromDomainModel(p)
-
-	err := r.sess.Save(&pst).Error
+func (r postRepository) Update(p Post) (Post, error) {
+	err := r.sess.Save(&p).Error
 	if err != nil {
-		return domain.Post{}, err
+		return Post{}, err
 	}
-
-	return pst.ToDomainModel(), nil
+	return p, nil
 }
 
 func (r postRepository) Delete(id int64) error {
-	err := r.sess.Table(PostTableName).Where("id = ?", id).Delete(domain.Post{}).Error
+	err := r.sess.Table(PostTableName).Where("id = ?", id).Delete(Post{}).Error
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
-func (p post) ToDomainModel() domain.Post {
-	return domain.Post{
-		Id:     p.Id,
-		UserId: p.UserId,
-		Title:  p.Title,
-		Body:   p.Body,
+func mapToPostCollection(posts []Post) Posts {
+	res := Posts{
+		Items: posts,
 	}
-}
-
-func (p *post) FromDomainModel(dp domain.Post) {
-	p.Id = dp.Id
-	p.UserId = dp.UserId
-	p.Title = dp.Title
-	p.Body = dp.Body
-}
-
-func mapToPostDomainCollection(posts []post) domain.Posts {
-	var result []domain.Post
-
-	if len(posts) == 0 {
-		result = make([]domain.Post, 0)
-	}
-
-	for _, c := range posts {
-		d := c.ToDomainModel()
-		result = append(result, d)
-	}
-
-	res := domain.Posts{
-		Items: result,
-	}
-
 	return res
 }
