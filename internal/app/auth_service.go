@@ -14,9 +14,9 @@ import (
 
 //go:generate mockery --dir . --name AuthService --output ./mocks
 type AuthService interface {
-	Register(user database.User) (database.User, string, error)
-	Login(user database.User) (database.User, string, error)
-	LoginGoogle(email string) (database.User, string, error)
+	Register(user database.User) (resources.AuthDto, error)
+	Login(user database.User) (resources.AuthDto, error)
+	LoginGoogle(email string) (resources.AuthDto, error)
 	GenerateJwt(user database.User) (string, error)
 }
 
@@ -32,47 +32,50 @@ func NewAuthService(us UserService, cf config.Configuration) AuthService {
 	}
 }
 
-func (s authService) Register(u database.User) (database.User, string, error) {
+func (s authService) Register(u database.User) (resources.AuthDto, error) {
 	_, err := s.userService.FindByEmail(u.Email)
 	if err == nil {
 		log.Printf("invalid credentials")
-		return database.User{}, "", errors.New("invalid credentials")
+		return resources.AuthDto{}, errors.New("invalid credentials")
 	}
 	user, err := s.userService.Save(u)
 	if err != nil {
 		log.Print(err)
-		return database.User{}, "", err
+		return resources.AuthDto{}, err
 	}
 	token, err := s.GenerateJwt(user)
-	return user, token, err
+	var authDto resources.AuthDto
+	return authDto.DatabaseToDto(token, user), err
 }
 
-func (s authService) Login(user database.User) (database.User, string, error) {
+func (s authService) Login(user database.User) (resources.AuthDto, error) {
 	u, err := s.userService.FindByEmail(user.Email)
 	if err != nil {
 		log.Printf("AuthService: login error %s", err)
-		return database.User{}, "", err
+		return resources.AuthDto{}, err
 	}
 	valid := s.checkPasswordHash(user.Password, u.Password)
 	if !valid {
-		return database.User{}, "", errors.New("invalid credentials")
+		return resources.AuthDto{}, errors.New("invalid credentials")
 	}
 	token, err := s.GenerateJwt(u)
-	return u, token, err
+	var authDto resources.AuthDto
+	return authDto.DatabaseToDto(token, u), err
 }
 
-func (s authService) LoginGoogle(email string) (database.User, string, error) {
+func (s authService) LoginGoogle(email string) (resources.AuthDto, error) {
 	u, err := s.userService.FindByEmail(email)
 	if err != nil {
 		u.Email = email
 		u, err = s.userService.Save(u)
 		if err != nil {
 			log.Print(err)
-			return database.User{}, "", err
+			return resources.AuthDto{}, err
 		}
 	}
 	token, err := s.GenerateJwt(u)
-	return u, token, err
+	var authDto resources.AuthDto
+	return authDto.DatabaseToDto(token, u), err
 }
 
 func (s authService) GenerateJwt(user database.User) (string, error) {

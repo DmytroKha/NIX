@@ -5,14 +5,15 @@ import (
 	"log"
 	"nix_education/internal/domain"
 	"nix_education/internal/infra/database"
+	"nix_education/internal/infra/http/resources"
 )
 
 //go:generate mockery --dir . --name CommentService --output ./mocks
 type CommentService interface {
-	Save(comment database.Comment) (database.Comment, error)
-	Update(comment database.Comment) (database.Comment, error)
-	Find(postId, id int64) (database.Comment, error)
-	FindAll(postId int64, p domain.Pagination) (database.Comments, error)
+	Save(comment database.Comment) (resources.CommentDto, error)
+	Update(comment database.Comment) (resources.CommentDto, error)
+	Find(postId, id int64) (resources.CommentDto, error)
+	FindAll(postId int64, p domain.Pagination) (resources.CommentsDto, error)
 	Delete(postId, id int64, email string) error
 }
 
@@ -28,54 +29,58 @@ func NewCommentService(r database.CommentRepository, ps PostService) CommentServ
 	}
 }
 
-func (s commentService) Save(p database.Comment) (database.Comment, error) {
+func (s commentService) Save(p database.Comment) (resources.CommentDto, error) {
 	_, err := s.postServise.Find(p.PostId)
 	if err != nil {
 		log.Print(err)
-		return database.Comment{}, err
+		return resources.CommentDto{}, err
 	}
 	comment, err := s.commentRepo.Save(p)
 	if err != nil {
 		log.Print(err)
-		return database.Comment{}, err
+		return resources.CommentDto{}, err
 	}
-	return comment, nil
+	var commentDto resources.CommentDto
+	return commentDto.DatabaseToDto(comment), nil
 }
 
-func (s commentService) Find(postId, id int64) (database.Comment, error) {
+func (s commentService) Find(postId, id int64) (resources.CommentDto, error) {
 	comment, err := s.commentRepo.Find(postId, id)
 	if err != nil {
 		log.Print(err)
-		return database.Comment{}, err
+		return resources.CommentDto{}, err
 	}
-	return comment, nil
+	var commentDto resources.CommentDto
+	return commentDto.DatabaseToDto(comment), nil
 }
 
-func (s commentService) FindAll(postId int64, p domain.Pagination) (database.Comments, error) {
+func (s commentService) FindAll(postId int64, p domain.Pagination) (resources.CommentsDto, error) {
 	comments, err := s.commentRepo.FindAll(postId, p)
 	if err != nil {
 		log.Print(err)
-		return database.Comments{}, err
+		return resources.CommentsDto{}, err
 	}
-	return comments, nil
+	var commentDto resources.CommentDto
+	return commentDto.DatabaseToDtoCollection(comments), nil
 }
 
-func (s commentService) Update(p database.Comment) (database.Comment, error) {
+func (s commentService) Update(p database.Comment) (resources.CommentDto, error) {
 	post, err := s.commentRepo.Find(p.PostId, p.Id)
 	if err != nil {
 		log.Print(err)
-		return database.Comment{}, err
+		return resources.CommentDto{}, err
 	}
 	if p.Email != post.Email {
 		err = errors.New("user email mismatch")
-		return database.Comment{}, err
+		return resources.CommentDto{}, err
 	}
 	comment, err := s.commentRepo.Update(p)
 	if err != nil {
 		log.Print(err)
-		return database.Comment{}, err
+		return resources.CommentDto{}, err
 	}
-	return comment, nil
+	var commentDto resources.CommentDto
+	return commentDto.DatabaseToDto(comment), nil
 }
 
 func (s commentService) Delete(postId, id int64, email string) error {
