@@ -6,7 +6,6 @@ import (
 	"nix_education/internal/app"
 	"nix_education/internal/domain"
 	"nix_education/internal/infra/http/requests"
-	"nix_education/internal/infra/http/resources"
 	"strconv"
 )
 
@@ -56,12 +55,12 @@ func (c CommentController) Save(ctx echo.Context) error {
 	p.PostId = postId
 	email := GetUserValueFromJWT(ctx, UserEmailKey)
 	p.Email = email
-	createdComment, err := c.commentService.Save(p)
+	createdCommentDto, err := c.commentService.Save(p)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusInternalServerError, err)
 	}
-	var commentDto resources.CommentDto
-	return FormatedResponse(ctx, http.StatusCreated, commentDto.DatabaseToDto(createdComment))
+
+	return FormatedResponse(ctx, http.StatusCreated, createdCommentDto)
 }
 
 // FindComment godoc
@@ -87,12 +86,12 @@ func (c CommentController) Find(ctx echo.Context) error {
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-	comment, err := c.commentService.Find(postId, commentId)
+	commentDto, err := c.commentService.Find(postId, commentId)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusNotFound, err)
 	}
-	var commentDto resources.CommentDto
-	return FormatedResponse(ctx, http.StatusOK, commentDto.DatabaseToDto(comment))
+
+	return FormatedResponse(ctx, http.StatusOK, commentDto)
 }
 
 // ListComments godoc
@@ -104,7 +103,7 @@ func (c CommentController) Find(ctx echo.Context) error {
 // @Produce      json
 // @Produce      xml
 // @Param        postId   path      string  true  "Post ID"
-// @Success      200  {object}  resources.CommentDto
+// @Success      200  {object}  resources.CommentsDto
 // @Failure      400  {string}  echo.HTTPError
 // @Router       /posts/{postId}/comments [get]
 func (c CommentController) FindAll(ctx echo.Context) error {
@@ -116,12 +115,12 @@ func (c CommentController) FindAll(ctx echo.Context) error {
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-	comments, err := c.commentService.FindAll(postId, pagination)
+	commentsDto, err := c.commentService.FindAll(postId, pagination)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusNotFound, err)
 	}
-	var commentDto resources.CommentDto
-	return FormatedResponse(ctx, http.StatusOK, commentDto.DatabaseToDtoCollection(comments))
+
+	return FormatedResponse(ctx, http.StatusOK, commentsDto)
 }
 
 // UpdateComment godoc
@@ -169,12 +168,12 @@ func (c CommentController) Update(ctx echo.Context) error {
 	p.PostId = postId
 	p.Id = id
 	p.Email = email
-	updatedComment, err := c.commentService.Update(p)
+	updatedCommentDto, err := c.commentService.Update(p)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusInternalServerError, err)
 	}
-	var commentDto resources.CommentDto
-	return FormatedResponse(ctx, http.StatusOK, commentDto.DatabaseToDto(updatedComment))
+
+	return FormatedResponse(ctx, http.StatusOK, updatedCommentDto)
 }
 
 // DeleteComment godoc

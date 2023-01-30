@@ -4,15 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/goccy/go-json"
-	"nix_education/internal/app"
-	"nix_education/internal/infra/http/requests"
-	"nix_education/internal/infra/http/resources"
-
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"nix_education/internal/app"
+	"nix_education/internal/infra/http/requests"
 	"os"
 	"strconv"
 
@@ -76,12 +74,11 @@ func (c AuthController) Register(ctx echo.Context) error {
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-	user, token, err := c.authService.Register(u)
+	userDto, err := c.authService.Register(u)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-	var authDto resources.AuthDto
-	return FormatedResponse(ctx, http.StatusCreated, authDto.DatabaseToDto(token, user))
+	return FormatedResponse(ctx, http.StatusCreated, userDto)
 
 }
 
@@ -112,12 +109,11 @@ func (c AuthController) Login(ctx echo.Context) error {
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-	user, token, err := c.authService.Login(u)
+	userDto, err := c.authService.Login(u)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-	var authDto resources.AuthDto
-	return FormatedResponse(ctx, http.StatusOK, authDto.DatabaseToDto(token, user))
+	return FormatedResponse(ctx, http.StatusOK, userDto)
 }
 
 // LogInUserWithGooglePartOne godoc
@@ -136,7 +132,6 @@ func (c AuthController) LoginGoogle(ctx echo.Context) error {
 	url := googleOauthConfig.AuthCodeURL(oauthStateString)
 	err := ctx.Redirect(http.StatusTemporaryRedirect, url)
 	if err != nil {
-		//return echo.NewHTTPError(http.StatusBadRequest, err)
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
 	return nil
@@ -150,7 +145,7 @@ func (c AuthController) Callback(ctx echo.Context) error {
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-	var authDto resources.AuthDto
+
 	cont, err := getUserInfo(token)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusUnprocessableEntity, err)
@@ -163,11 +158,11 @@ func (c AuthController) Callback(ctx echo.Context) error {
 	if !cnt.Verified {
 		return FormatedResponse(ctx, http.StatusUnauthorized, fmt.Errorf("email is not verified"))
 	}
-	user, jwtToken, err := c.authService.LoginGoogle(cnt.Email)
+	userDto, err := c.authService.LoginGoogle(cnt.Email)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-	return FormatedResponse(ctx, http.StatusCreated, authDto.DatabaseToDto(jwtToken, user))
+	return FormatedResponse(ctx, http.StatusCreated, userDto)
 
 }
 

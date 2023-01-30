@@ -6,7 +6,6 @@ import (
 	"nix_education/internal/app"
 	"nix_education/internal/domain"
 	"nix_education/internal/infra/http/requests"
-	"nix_education/internal/infra/http/resources"
 	"strconv"
 )
 
@@ -54,12 +53,12 @@ func (c PostController) Save(ctx echo.Context) error {
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
 	p.UserId = int64(userId)
-	createdPost, err := c.postService.Save(p)
+	createdPostDto, err := c.postService.Save(p)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusInternalServerError, err)
 	}
-	var postDto resources.PostDto
-	return FormatedResponse(ctx, http.StatusCreated, postDto.DatabaseToDto(createdPost))
+
+	return FormatedResponse(ctx, http.StatusCreated, createdPostDto)
 }
 
 // FindPost godoc
@@ -80,12 +79,12 @@ func (c PostController) Find(ctx echo.Context) error {
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-	post, err := c.postService.Find(postId)
+	postDto, err := c.postService.Find(postId)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusNotFound, err)
 	}
-	var postDto resources.PostDto
-	return FormatedResponse(ctx, http.StatusOK, postDto.DatabaseToDto(post))
+
+	return FormatedResponse(ctx, http.StatusOK, postDto)
 }
 
 // ListPosts godoc
@@ -96,7 +95,7 @@ func (c PostController) Find(ctx echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Produce      xml
-// @Success      200  {object}  resources.PostDto
+// @Success      200  {object}  resources.PostsDto
 // @Failure      400  {string}  echo.HTTPError
 // @Router       /posts [get]
 func (c PostController) FindAll(ctx echo.Context) error {
@@ -104,12 +103,12 @@ func (c PostController) FindAll(ctx echo.Context) error {
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-	posts, err := c.postService.FindAll(pagination)
+	postsDto, err := c.postService.FindAll(pagination)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusNotFound, err)
 	}
-	var postDto resources.PostDto
-	return FormatedResponse(ctx, http.StatusOK, postDto.DatabaseToDtoCollection(posts))
+
+	return FormatedResponse(ctx, http.StatusOK, postsDto)
 }
 
 // UpdatePost godoc
@@ -152,12 +151,12 @@ func (c PostController) Update(ctx echo.Context) error {
 	}
 	p.UserId = int64(userId)
 	p.Id = postId
-	updatedPost, err := c.postService.Update(p)
+	updatedPostDto, err := c.postService.Update(p)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusInternalServerError, err)
 	}
-	var postDto resources.PostDto
-	return FormatedResponse(ctx, http.StatusOK, postDto.DatabaseToDto(updatedPost))
+
+	return FormatedResponse(ctx, http.StatusOK, updatedPostDto)
 }
 
 // DeletePost godoc
