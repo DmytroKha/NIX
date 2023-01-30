@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"nix_education/internal/app"
 	"nix_education/internal/infra/http/requests"
+	"nix_education/internal/infra/http/resources"
 )
 
 type UserController struct {
@@ -42,14 +43,10 @@ func (c UserController) SetPassword(ctx echo.Context) error {
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusUnprocessableEntity, err)
 	}
-	u, err := user.ToDatabaseModel()
-	if err != nil {
-		return FormatedResponse(ctx, http.StatusBadRequest, err)
-	}
-	updatedUserDto, err := c.userService.SetPassword(u)
+	updatedUser, err := c.userService.SetPassword(user)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusInternalServerError, err)
 	}
-
-	return FormatedResponse(ctx, http.StatusOK, updatedUserDto)
+	var userDto resources.UserDto
+	return FormatedResponse(ctx, http.StatusOK, userDto.DatabaseToDto(updatedUser))
 }

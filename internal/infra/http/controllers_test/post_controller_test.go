@@ -8,7 +8,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"log"
 	"net/http"
-	"nix_education/internal/infra/database"
+	"nix_education/internal/infra/http/requests"
 )
 
 var postControllerTests = []*requestTest{
@@ -212,12 +212,18 @@ var postControllerTests = []*requestTest{
 func postModelMocker(n, id int) {
 	for i := 1; i <= n; i++ {
 		userID := int64(id)
-		pModel := database.Post{
-			Title:  fmt.Sprintf("Post%d", i),
-			Body:   fmt.Sprintf("some post text%d", i),
-			UserId: userID,
+		/*
+			pModel := database.Post{
+				Title:  fmt.Sprintf("Post%d", i),
+				Body:   fmt.Sprintf("some post text%d", i),
+				UserId: userID,
+			}
+		*/
+		pModel := requests.PostRequest{
+			Title: fmt.Sprintf("Post%d", i),
+			Body:  fmt.Sprintf("some post text%d", i),
 		}
-		_, err := postService.Save(pModel)
+		_, err := postService.Save(pModel, userID)
 		if err != nil {
 			log.Fatalf("postModelMocker() failed: %s", err)
 		}

@@ -6,6 +6,7 @@ import (
 	"nix_education/internal/app"
 	"nix_education/internal/domain"
 	"nix_education/internal/infra/http/requests"
+	"nix_education/internal/infra/http/resources"
 	"strconv"
 )
 
@@ -43,22 +44,17 @@ func (c PostController) Save(ctx echo.Context) error {
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusUnprocessableEntity, err)
 	}
-	p, err := post.ToDomainModel()
-	if err != nil {
-		return FormatedResponse(ctx, http.StatusBadRequest, err)
-	}
 	jtl := GetUserValueFromJWT(ctx, UserIdKey)
 	userId, err := strconv.Atoi(jtl)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-	p.UserId = int64(userId)
-	createdPostDto, err := c.postService.Save(p)
+	createdPost, err := c.postService.Save(post, int64(userId))
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusInternalServerError, err)
 	}
-
-	return FormatedResponse(ctx, http.StatusCreated, createdPostDto)
+	var postDto resources.PostDto
+	return FormatedResponse(ctx, http.StatusCreated, postDto.DatabaseToDto(createdPost))
 }
 
 // FindPost godoc
@@ -79,12 +75,12 @@ func (c PostController) Find(ctx echo.Context) error {
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-	postDto, err := c.postService.Find(postId)
+	post, err := c.postService.Find(postId)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusNotFound, err)
 	}
-
-	return FormatedResponse(ctx, http.StatusOK, postDto)
+	var postDto resources.PostDto
+	return FormatedResponse(ctx, http.StatusOK, postDto.DatabaseToDto(post))
 }
 
 // ListPosts godoc
@@ -95,7 +91,7 @@ func (c PostController) Find(ctx echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Produce      xml
-// @Success      200  {object}  resources.PostsDto
+// @Success      200  {object}  resources.PostDto
 // @Failure      400  {string}  echo.HTTPError
 // @Router       /posts [get]
 func (c PostController) FindAll(ctx echo.Context) error {
@@ -103,12 +99,12 @@ func (c PostController) FindAll(ctx echo.Context) error {
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-	postsDto, err := c.postService.FindAll(pagination)
+	posts, err := c.postService.FindAll(pagination)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusNotFound, err)
 	}
-
-	return FormatedResponse(ctx, http.StatusOK, postsDto)
+	var postDto resources.PostDto
+	return FormatedResponse(ctx, http.StatusOK, postDto.DatabaseToDtoCollection(posts))
 }
 
 // UpdatePost godoc
@@ -140,23 +136,17 @@ func (c PostController) Update(ctx echo.Context) error {
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusUnprocessableEntity, err)
 	}
-	p, err := post.ToDomainModel()
-	if err != nil {
-		return FormatedResponse(ctx, http.StatusBadRequest, err)
-	}
 	jtl := GetUserValueFromJWT(ctx, UserIdKey)
 	userId, err := strconv.Atoi(jtl)
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusBadRequest, err)
 	}
-	p.UserId = int64(userId)
-	p.Id = postId
-	updatedPostDto, err := c.postService.Update(p)
+	updatedPost, err := c.postService.Update(post, postId, int64(userId))
 	if err != nil {
 		return FormatedResponse(ctx, http.StatusInternalServerError, err)
 	}
-
-	return FormatedResponse(ctx, http.StatusOK, updatedPostDto)
+	var postDto resources.PostDto
+	return FormatedResponse(ctx, http.StatusOK, postDto.DatabaseToDto(updatedPost))
 }
 
 // DeletePost godoc

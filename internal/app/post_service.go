@@ -5,15 +5,15 @@ import (
 	"log"
 	"nix_education/internal/domain"
 	"nix_education/internal/infra/database"
-	"nix_education/internal/infra/http/resources"
+	"nix_education/internal/infra/http/requests"
 )
 
 //go:generate mockery --dir . --name PostService --output ./mocks
 type PostService interface {
-	Save(post database.Post) (resources.PostDto, error)
-	Update(post database.Post) (resources.PostDto, error)
-	Find(id int64) (resources.PostDto, error)
-	FindAll(p domain.Pagination) (resources.PostsDto, error)
+	Save(pst requests.PostRequest, userId int64) (database.Post, error)
+	Update(pst requests.PostRequest, id, userId int64) (database.Post, error)
+	Find(id int64) (database.Post, error)
+	FindAll(p domain.Pagination) (database.Posts, error)
 	Delete(id, userId int64) error
 }
 
@@ -27,54 +27,65 @@ func NewPostService(r database.PostRepository) PostService {
 	}
 }
 
-func (s postService) Save(p database.Post) (resources.PostDto, error) {
+func (s postService) Save(pst requests.PostRequest, userId int64) (database.Post, error) {
+	p, err := pst.ToDatabaseModel()
+	if err != nil {
+		log.Print(err)
+		return database.Post{}, err
+	}
+
+	p.UserId = userId
 	post, err := s.postRepo.Save(p)
 	if err != nil {
 		log.Print(err)
-		return resources.PostDto{}, err
+		return database.Post{}, err
 	}
-	var postDto resources.PostDto
-	return postDto.DatabaseToDto(post), nil
+	return post, nil
 }
 
-func (s postService) Find(id int64) (resources.PostDto, error) {
+func (s postService) Find(id int64) (database.Post, error) {
 	post, err := s.postRepo.Find(id)
 	if err != nil {
 		log.Print(err)
-		return resources.PostDto{}, err
+		return database.Post{}, err
 	}
-	var postDto resources.PostDto
-	return postDto.DatabaseToDto(post), nil
+	return post, nil
 }
 
-func (s postService) FindAll(p domain.Pagination) (resources.PostsDto, error) {
+func (s postService) FindAll(p domain.Pagination) (database.Posts, error) {
 	posts, err := s.postRepo.FindAll(p)
 	if err != nil {
 		log.Print(err)
-		return resources.PostsDto{}, err
+		return database.Posts{}, err
 	}
-	var postDto resources.PostDto
-	return postDto.DatabaseToDtoCollection(posts), nil
+	return posts, nil
 }
 
-func (s postService) Update(p database.Post) (resources.PostDto, error) {
-	findPost, err := s.Find(p.Id)
+func (s postService) Update(pst requests.PostRequest, id, userId int64) (database.Post, error) {
+	p, err := pst.ToDatabaseModel()
 	if err != nil {
 		log.Print(err)
-		return resources.PostDto{}, err
+		return database.Post{}, err
+	}
+	p.UserId = userId
+	p.Id = id
+
+	findPost, err := s.Find(id)
+	if err != nil {
+		log.Print(err)
+		return database.Post{}, err
 	}
 	if findPost.UserId != p.UserId {
 		err := errors.New("user id mismatch")
 		log.Print(err)
-		return resources.PostDto{}, err
+		return database.Post{}, err
 	}
 	post, err := s.postRepo.Update(p)
 	if err != nil {
 		log.Print(err)
-		return resources.PostDto{}, err
+		return database.Post{}, err
 	}
-	var postDto resources.PostDto
-	return postDto.DatabaseToDto(post), nil
+	return post, nil
 }
 
 func (s postService) Delete(id, userId int64) error {

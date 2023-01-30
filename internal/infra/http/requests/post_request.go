@@ -9,7 +9,7 @@ type PostRequest struct {
 	Body  string `json:"body" validate:"required"`
 }
 
-func (r PostRequest) ToDomainModel() (database.Post, error) {
+func (r PostRequest) ToDatabaseModel() (database.Post, error) {
 	var pst database.Post
 	pst.Title = r.Title
 	pst.Body = r.Body

@@ -4,13 +4,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"nix_education/internal/infra/database"
-	"nix_education/internal/infra/http/resources"
+	"nix_education/internal/infra/http/requests"
 )
 
 //go:generate mockery --dir . --name UserService --output ./mocks
 type UserService interface {
 	Save(user database.User) (database.User, error)
-	SetPassword(user database.User) (resources.UserDto, error)
+	SetPassword(usr requests.UserRequest) (database.User, error)
 	GeneratePasswordHash(password string) (string, error)
 	FindByEmail(email string) (database.User, error)
 }
@@ -40,29 +40,34 @@ func (s userService) Save(u database.User) (database.User, error) {
 	return user, nil
 }
 
-func (s userService) SetPassword(u database.User) (resources.UserDto, error) {
+func (s userService) SetPassword(usr requests.UserRequest) (database.User, error) {
+	u, err := usr.ToDatabaseModel()
+	if err != nil {
+		log.Printf("UserService: %s", err)
+		return database.User{}, err
+	}
+
 	user, err := s.FindByEmail(u.Email)
 	if err != nil {
 		log.Printf("UserService: %s", err)
-		return resources.UserDto{}, err
+		return database.User{}, err
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(""))
 	if err != nil {
 		log.Printf("UserService: %s", err)
-		return resources.UserDto{}, err
+		return database.User{}, err
 	}
 	user.Password, err = s.GeneratePasswordHash(u.Password)
 	if err != nil {
 		log.Printf("UserService: %s", err)
-		return resources.UserDto{}, err
+		return database.User{}, err
 	}
 	updatedUser, err := s.userRepo.Update(user)
 	if err != nil {
 		log.Print(err)
-		return resources.UserDto{}, err
+		return database.User{}, err
 	}
-	var userDto resources.UserDto
-	return userDto.DatabaseToDto(updatedUser), nil
+	return updatedUser, nil
 }
 
 func (s userService) FindByEmail(email string) (database.User, error) {

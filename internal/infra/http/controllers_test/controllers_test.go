@@ -47,7 +47,7 @@ func TestMain(m *testing.M) {
 func TestControllers(t *testing.T) {
 
 	var conf = config.Configuration{
-		DatabaseName:        "nix_education_test",
+		DatabaseName:        "nix_education",
 		DatabaseHost:        "127.0.0.1:3306",
 		DatabaseUser:        "root",
 		DatabasePassword:    "root",
