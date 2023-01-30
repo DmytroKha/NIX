@@ -7,6 +7,7 @@ import (
 	"log"
 	"nix_education/config"
 	"nix_education/internal/infra/database"
+	"nix_education/internal/infra/http/requests"
 	"nix_education/internal/infra/http/resources"
 	"strconv"
 	"time"
@@ -14,9 +15,9 @@ import (
 
 //go:generate mockery --dir . --name AuthService --output ./mocks
 type AuthService interface {
-	Register(user database.User) (resources.AuthDto, error)
-	Login(user database.User) (resources.AuthDto, error)
-	LoginGoogle(email string) (resources.AuthDto, error)
+	Register(user requests.UserRequest) (database.User, string, error)
+	Login(user requests.UserRequest) (database.User, string, error)
+	LoginGoogle(email string) (database.User, string, error)
 	GenerateJwt(user database.User) (string, error)
 }
 
@@ -32,50 +33,57 @@ func NewAuthService(us UserService, cf config.Configuration) AuthService {
 	}
 }
 
-func (s authService) Register(u database.User) (resources.AuthDto, error) {
-	_, err := s.userService.FindByEmail(u.Email)
+func (s authService) Register(usr requests.UserRequest) (database.User, string, error) {
+	u, err := usr.ToDatabaseModel()
+	if err != nil {
+		log.Print(err)
+		return database.User{}, "", err
+	}
+	_, err = s.userService.FindByEmail(u.Email)
 	if err == nil {
 		log.Printf("invalid credentials")
-		return resources.AuthDto{}, errors.New("invalid credentials")
+		return database.User{}, "", errors.New("invalid credentials")
 	}
 	user, err := s.userService.Save(u)
 	if err != nil {
 		log.Print(err)
-		return resources.AuthDto{}, err
+		return database.User{}, "", err
 	}
 	token, err := s.GenerateJwt(user)
-	var authDto resources.AuthDto
-	return authDto.DatabaseToDto(token, user), err
+	return user, token, err
 }
 
-func (s authService) Login(user database.User) (resources.AuthDto, error) {
+func (s authService) Login(usr requests.UserRequest) (database.User, string, error) {
+	user, err := usr.ToDatabaseModel()
+	if err != nil {
+		log.Printf("AuthService: login error %s", err)
+		return database.User{}, "", err
+	}
 	u, err := s.userService.FindByEmail(user.Email)
 	if err != nil {
 		log.Printf("AuthService: login error %s", err)
-		return resources.AuthDto{}, err
+		return database.User{}, "", err
 	}
 	valid := s.checkPasswordHash(user.Password, u.Password)
 	if !valid {
-		return resources.AuthDto{}, errors.New("invalid credentials")
+		return database.User{}, "", errors.New("invalid credentials")
 	}
 	token, err := s.GenerateJwt(u)
-	var authDto resources.AuthDto
-	return authDto.DatabaseToDto(token, u), err
+	return u, token, err
 }
 
-func (s authService) LoginGoogle(email string) (resources.AuthDto, error) {
+func (s authService) LoginGoogle(email string) (database.User, string, error) {
 	u, err := s.userService.FindByEmail(email)
 	if err != nil {
 		u.Email = email
 		u, err = s.userService.Save(u)
 		if err != nil {
 			log.Print(err)
-			return resources.AuthDto{}, err
+			return database.User{}, "", err
 		}
 	}
 	token, err := s.GenerateJwt(u)
-	var authDto resources.AuthDto
-	return authDto.DatabaseToDto(token, u), err
+	return u, token, err
 }
 
 func (s authService) GenerateJwt(user database.User) (string, error) {

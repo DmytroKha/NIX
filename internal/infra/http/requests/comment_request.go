@@ -9,7 +9,7 @@ type CommentRequest struct {
 	Body string `json:"body" validate:"required"`
 }
 
-func (r CommentRequest) ToDomainModel() (database.Comment, error) {
+func (r CommentRequest) ToDatabaseModel() (database.Comment, error) {
 	var cmt database.Comment
 	cmt.Name = r.Name
 	cmt.Body = r.Body
