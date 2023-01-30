@@ -1,0 +1,45 @@
+version: '3.9'
+services:
+  app:
+    container_name: nix_back
+    environment:
+      - DB_NAME=${DB_NAME:-nix_education}
+      - DB_HOST=${DB_HOST:-mysqldb}
+      - DB_USER=${DB_USER:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - JWT_SECRET=${JWT_SECRET:-123456}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-410752017225-ne1sg4eoe3hmkg136citn89vm62p5dpp.apps.googleusercontent.com}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-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}
+    build:
+      context: ../
+      dockerfile: .docker/Dockerfile
+    ports:
+      - '8081:8080'
+    restart: unless-stopped
+    depends_on:
+      - mysqldb
+    networks:
+      - default
+
+  mysqldb:
+    image: mysql:8.0
+    container_name: nix_db
+    environment:
+      - MYSQL_USER=${DB_USER:-root}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-root}
+      #- MYSQL_ROOT_PASSWORD='root'
+      - MYSQL_DB=${DB_NAME:-nix_education}
+      - DATABASE_HOST=${DB_HOST:-localhost}
+    volumes:
+      - my-db:/var/lib/mysql
+    ports:
+      - '3306:3306'
+    networks:
+      - default
+
+volumes:
+  my-db:
+
+networks:
+  default:
+    driver: bridge
